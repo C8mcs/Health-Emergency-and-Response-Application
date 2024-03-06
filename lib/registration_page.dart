@@ -68,7 +68,7 @@ class _RegistrationPageScreenState extends State<RegistrationPageScreen> {
                               textAlign: TextAlign.center,
                               text: TextSpan(
                                 text: "HERA",
-                                style: TextStyle(color: Colors.red, fontSize: 100,
+                                style: TextStyle(color: Colors.red, fontSize: 100, fontWeight: FontWeight.w800,
                                     shadows:[
                                       Shadow(
                                     color: Colors.grey,
@@ -185,11 +185,14 @@ class _RegistrationPageScreenState extends State<RegistrationPageScreen> {
                             ],
                           ),
                         ),
-                        Center(
+                       Center(
                           child: Container(
-                            child: Image.asset('assets/images/logo.png',
-                              height: 350,
-                              width: 350,),
+                            child: Transform.scale(
+                              scale: 1.5, // Adjust the scale factor as needed
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                              ),
+                            ),
                           ),
                         ),
                       ],
