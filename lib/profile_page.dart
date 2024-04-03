@@ -15,13 +15,14 @@ class ProfileApp extends StatelessWidget {
 }
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  //User Profile variableszs
   TextEditingController userHeight = TextEditingController();
   TextEditingController userWeight = TextEditingController();
   TextEditingController firstName = TextEditingController();
@@ -52,7 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.black,
             ),
             onPressed: () {
-              print('IconButton pressed ...');
+              print('IconButton pressed ...'); //Button function \^-^/??
             },
           ),
         ),
@@ -64,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.elliptical(100, 70), //tab curve
+              bottomLeft: Radius.elliptical(100, 70), //tab curve???
               bottomRight: Radius.circular(40),
             ),
           ),
