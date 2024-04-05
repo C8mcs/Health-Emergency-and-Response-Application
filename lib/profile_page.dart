@@ -15,7 +15,7 @@ class ProfileApp extends StatelessWidget {
 }
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -88,6 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: 20), // Add some space
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -112,77 +113,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                      Flexible(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                          child: TextFormField(
-                            controller: userHeight,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}')),
-                            ],
-                            keyboardType: TextInputType.number,
-                            autofocus: true,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                              labelText: 'Height (cm)',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.blue,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            validator: (value) {
-                              // Validation logic here
-                              return null;
-                            },
-                          ),
-                        ),
+                      CustomMeasurementFormField(
+                        labelText: 'Height (cm)',
+                        controller: userHeight,
+                        keyboardType: TextInputType.number,
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                          child: TextFormField(
-                            controller: userWeight,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}')),
-                            ],
-                            keyboardType: TextInputType.number,
-                            autofocus: true,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                              labelText: 'Weight (kg)',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.blue,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            validator: (value) {
-                              // Validation logic here
-                              return null;
-                            },
-                          ),
-                        ),
+                      CustomMeasurementFormField(
+                        labelText: 'Weight (kg)',
+                        controller: userWeight,
+                        keyboardType: TextInputType.number,
                       ),
                     ],
                   ),
@@ -190,65 +129,87 @@ class _ProfilePageState extends State<ProfilePage> {
                   buildTextField('Lastname', lastName),
                   Visibility(
                     visible: additionalInfoVisible,
-                    child: Column(
-                      children: [
-                        buildTextField('Age', userAge,
-                            keyboardType: TextInputType.number),
-                        buildTextField('Sex at Birth', userSex),
-                        buildTextField('Blood Type', userBloodType),
-                        buildTextField('Address', userAddress),
-                        Divider(
-                          thickness: 10,
-                        ),
-                        buildTextField(
-                            'Emergency Contact Person', emergencyContactName),
-                        buildTextField(
-                            'Emergency Contact Number', emergencyContactNumber,
-                            keyboardType: TextInputType.number),
-                        buildTextField('Emergency Contact Address',
-                            emergencyContactAddress),
-                        Divider(
-                          height: 20,
-                          thickness: 10,
-                        ),
-                        buildTextField('Medical Conditions:', userMedicalCond),
-                        buildTextField('Allergies:', userAllergies),
-                        buildTextField('Current Medication:', userMedications),
-                        SizedBox(height: 30),
-                        Container(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Save changes made by user
-                                setState(() {
-                                  userHeight = userHeight;
-                                  userWeight = userWeight;
-                                  firstName = firstName;
-                                  lastName = lastName;
-                                  userAge = userAge;
-                                  userSex = userSex;
-                                  userBloodType = userBloodType;
-                                  userAddress = userAddress;
-                                  emergencyContactName = emergencyContactName;
-                                  emergencyContactNumber =
-                                      emergencyContactNumber;
-                                  emergencyContactAddress =
-                                      emergencyContactAddress;
-                                  userMedicalCond = userMedicalCond;
-                                  userAllergies = userAllergies;
-                                  userMedications = userMedications;
-                                });
-                                // Hide additional information when dragged up
-                                setState(() {
-                                  additionalInfoVisible = false;
-                                });
-                              },
-                              child: Text('Save Profile'),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildTextField('Age', userAge,
+                                    keyboardType: TextInputType.number),
+                              ),
+                              Expanded(
+                                child: buildTextField('Sex at Birth', userSex),
+                              ),
+                              Expanded(
+                                child:
+                                    buildTextField('Blood Type', userBloodType),
+                              ),
+                            ],
+                          ),
+                          buildTextField('Address', userAddress),
+                          Divider(
+                            thickness: 10,
+                          ),
+                          buildTextFieldEmergencyContact(
+                              'Emergency Contact Person', emergencyContactName),
+                          buildTextFieldEmergencyContact(
+                              'Emergency Contact Number',
+                              emergencyContactNumber,
+                              keyboardType: TextInputType.number),
+                          buildTextFieldEmergencyContact(
+                              'Emergency Contact Address',
+                              emergencyContactAddress),
+                          Divider(
+                            height: 20,
+                            thickness: 10,
+                          ),
+                          buildTextField(
+                              'Medical Conditions:', userMedicalCond),
+                          buildTextField('Allergies:', userAllergies),
+                          buildTextField(
+                              'Current Medication:', userMedications),
+                          SizedBox(height: 30),
+                          Container(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Color(0xFFD92B4B)),
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.white),
+                                ),
+                                onPressed: () {
+                                  // Save changes made by user
+                                  setState(() {
+                                    userHeight = userHeight;
+                                    userWeight = userWeight;
+                                    firstName = firstName;
+                                    lastName = lastName;
+                                    userAge = userAge;
+                                    userSex = userSex;
+                                    userBloodType = userBloodType;
+                                    userAddress = userAddress;
+                                    emergencyContactName = emergencyContactName;
+                                    emergencyContactNumber =
+                                        emergencyContactNumber;
+                                    emergencyContactAddress =
+                                        emergencyContactAddress;
+                                    userMedicalCond = userMedicalCond;
+                                    userAllergies = userAllergies;
+                                    userMedications = userMedications;
+                                  });
+                                },
+                                child: Text('Save Profile'),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -260,12 +221,13 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  //for user personal info style
   Widget buildTextField(String labelText, TextEditingController controller,
       {TextInputType keyboardType = TextInputType.text}) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
       child: SizedBox(
-        height: 25,
+        height: 30, // Added a fixed height
         child: TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -291,6 +253,112 @@ class _ProfilePageState extends State<ProfilePage> {
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: Color(0xFFD92B4B),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          validator: (value) {
+            // Validation logic here
+            return null;
+          },
+        ),
+      ),
+    );
+  }
+
+  // Custom widget for emergency contact style
+  Widget buildTextFieldEmergencyContact(
+      String labelText, TextEditingController controller,
+      {TextInputType keyboardType = TextInputType.text}) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+      child: SizedBox(
+        height: 30, // Added a fixed height
+        child: TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          autofocus: true,
+          obscureText: false,
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            labelText: labelText,
+            labelStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+            ),
+            filled: true,
+            fillColor: Color(0xFF666573),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Color(0xFF666573),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Color(0xFF666573),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          validator: (value) {
+            // Validation logic here
+            return null;
+          },
+        ),
+      ),
+    );
+  }
+}
+
+//height and weight
+class CustomMeasurementFormField extends StatelessWidget {
+  final String labelText;
+  final TextEditingController controller;
+  final TextInputType keyboardType;
+
+  const CustomMeasurementFormField({
+    required this.labelText,
+    required this.controller,
+    required this.keyboardType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: TextFormField(
+          controller: controller,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+          ],
+          keyboardType: keyboardType,
+          autofocus: true,
+          obscureText: false,
+          style: TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            labelText: labelText,
+            filled: true,
+            fillColor: Color(0xFFD9D9D9),
+            labelStyle: TextStyle(
+              color: Colors.red,
+              fontSize: 15,
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.white,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.blue,
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(8),
