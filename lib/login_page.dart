@@ -1,135 +1,144 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-//TEMPORARY!!
-void main() {
-  runApp(LoginPage());
-}
-
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const MyHomePage(title: 'Login Page'),
-    );
-  }
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
-  final String title;
+  bool _formFilled = false;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red,
-      body: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'HERA',
-                      style: TextStyle(
-                          fontSize: 70,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Oswald'),
-                    ),
-                    //ADD SHEARA LOGO HERE and the button pressing function
-                    Text(
-                      'Long press to send a distress signal',
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Oswald'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Colors.red,
-              width: double.infinity,
-              child: Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Form(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Welcome back bbgurl',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextFormField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Username/Email',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                        obscureText: true,
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add login logic here
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(100, 50),
-                          backgroundColor: Colors.white,
-                        ),
-                        child: Text('Login'),
+      body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Transform.translate(offset: Offset(0, 50),
+                child: Text(
+                  'Hello, I am',
+                  style: TextStyle(
+                    fontSize: 45,
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.grey,
+                        blurRadius: 10.0,
+                        offset: Offset(2.0, 2.0),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
+              Transform.translate(
+                offset: Offset(0, 10), // Adjust horizontal translation to minimize space
+                child: Text(
+                  'HERA',
+                  style: TextStyle(
+                    fontSize: 90,
+                    color: Colors.red.shade700,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.grey,
+                        blurRadius: 10.0,
+                        offset: Offset(2.0, 2.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Transform.translate(
+                offset: Offset(0, -20), // Adjust horizontal translation to minimize space
+                child:Text(
+                  'Bringing your safety into your\nfingertips',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  strutStyle: StrutStyle(
+                    height: 1, // Set the line height to 1 to remove white spaces between lines
+                  ),
+                ),
+              ),
+              Transform.translate(offset: Offset(0, -20),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _usernameController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        fillColor: Colors.red.shade700,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        hintText: 'Enter your username',
+                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      onChanged: (_) => _checkFormFilled(),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: _passwordController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        fillColor: Colors.red.shade700,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        hintText: 'Enter your password',
+                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      obscureText: true,
+                      onChanged: (_) => _checkFormFilled(),
+                    ),
+                  ],
+                ),
+              ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _formFilled ? _login : null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(100, 50),
+                  backgroundColor: _formFilled ? Colors.redAccent.shade200 : Colors.grey, // Change color based on _formFilled condition
+                ),
+                child: Text('Login',
+                style: TextStyle(color: Colors.white)),
+              ),
+
+            ],
           ),
-        ],
-      ),
+        ),
     );
+  }
+
+  void _checkFormFilled() {
+    setState(() {
+      _formFilled = _usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty;
+    });
+  }
+
+  void _login() {
+    print('Login button pressed!');
+    // Add your login logic here
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }
