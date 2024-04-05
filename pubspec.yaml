@@ -66,6 +66,7 @@ flutter:
     - assets/images/logo.png
     - assets\images\glow.png
     - assets\images\button.png
+    - assets\image\send_sos.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
