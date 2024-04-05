@@ -15,7 +15,7 @@ class ProfileApp extends StatelessWidget {
 }
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -80,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.elliptical(100, 70), //tab curve???
+                bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
               ),
             ),
@@ -88,7 +88,13 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 20), // Add some space
+                  Text(
+                    'User Info',
+                    style: TextStyle(
+                      color: Color(0xFFD92B4B),
+                      fontSize: 20,
+                    ),
+                  ),
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -127,6 +133,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   buildTextField('Firstname', firstName),
                   buildTextField('Lastname', lastName),
+                  SizedBox(
+                    height: 10,
+                  ),
                   Visibility(
                     visible: additionalInfoVisible,
                     child: SingleChildScrollView(
@@ -170,7 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           buildTextField('Allergies:', userAllergies),
                           buildTextField(
                               'Current Medication:', userMedications),
-                          SizedBox(height: 30),
+                          SizedBox(height: 10),
                           Container(
                             child: Align(
                               alignment: Alignment.centerRight,
