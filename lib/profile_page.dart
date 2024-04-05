@@ -85,6 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             child: SingleChildScrollView(
+              padding: EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -234,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildTextField(String labelText, TextEditingController controller,
       {TextInputType keyboardType = TextInputType.text}) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       child: SizedBox(
         height: 30, // Added a fixed height
         child: TextFormField(
@@ -244,7 +245,11 @@ class _ProfilePageState extends State<ProfilePage> {
           obscureText: false,
           style: TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            suffixIcon: Icon(
+              Icons.edit_square,
+              size: 20,
+              color: Colors.white,
+            ),
             labelText: labelText,
             labelStyle: TextStyle(
               color: Colors.white,
@@ -281,9 +286,9 @@ class _ProfilePageState extends State<ProfilePage> {
       String labelText, TextEditingController controller,
       {TextInputType keyboardType = TextInputType.text}) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       child: SizedBox(
-        height: 30, // Added a fixed height
+        height: 30,
         child: TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -291,6 +296,11 @@ class _ProfilePageState extends State<ProfilePage> {
           obscureText: false,
           style: TextStyle(color: Colors.white),
           decoration: InputDecoration(
+            suffixIcon: Icon(
+              Icons.edit_square,
+              size: 20,
+              color: Colors.white,
+            ),
             contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             labelText: labelText,
             labelStyle: TextStyle(
