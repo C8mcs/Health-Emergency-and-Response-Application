@@ -1,9 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:health_emergency_response_app/splash_video_screen.dart';
 import 'package:health_emergency_response_app/welcome_page.dart'; // Import your splash screen widget
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

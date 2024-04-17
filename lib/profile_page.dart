@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               Expanded(
                                 child:
-                                    buildTextField('Blood Type', userBloodType),
+                                buildTextField('Blood Type', userBloodType),
                               ),
                             ],
                           ),
@@ -187,11 +187,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: ElevatedButton(
                                 style: ButtonStyle(
                                   backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Color(0xFFD92B4B)),
+                                  MaterialStateProperty.all<Color>(
+                                      Color(0xFFD92B4B)),
                                   foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.white),
+                                  MaterialStateProperty.all<Color>(
+                                      Colors.white),
                                 ),
                                 onPressed: () {
                                   // Save changes made by user

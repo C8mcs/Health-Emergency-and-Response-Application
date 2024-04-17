@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'profile_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -10,6 +13,10 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _passwordController = TextEditingController();
 
   bool _formFilled = false;
+
+  final _auth = FirebaseAuth.instance;
+  late String email;
+  late String password;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +92,10 @@ class _LoginPageState extends State<LoginPage> {
                         hintText: 'Enter your username',
                         hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
-                      onChanged: (_) => _checkFormFilled(),
+                      onChanged: (value) {
+                        email = value;
+                        _checkFormFilled();
+                      },
                     ),
                     SizedBox(height: 10),
                     TextFormField(
@@ -101,7 +111,10 @@ class _LoginPageState extends State<LoginPage> {
                         hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
                       obscureText: true,
-                      onChanged: (_) => _checkFormFilled(),
+                      onChanged: (value) {
+                        password = value;
+                        _checkFormFilled();
+                      },
                     ),
                   ],
                 ),
@@ -130,9 +143,34 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _login() {
-    print('Login button pressed!');
-    // Add your login logic here
+  Future<void> _login() async {
+
+    try {
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      if (userCredential != null) {
+        // Successful Login - Navigate to profile page
+        Navigator.pushReplacementNamed(context, 'profile_screen');  // Replace 'profile_screen' with your actual route name
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = '';
+      if (e.code == 'user-not-found') {
+        message = 'No user found for that email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Invalid credentials.';
+      } else {
+        message = 'An error occurred. Please try again.';  // Generic message for other errors
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2), // Adjust duration as needed
+        ),
+      );
+    } finally {
+    }
   }
 
   @override

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "908008172444",
+    "firebase_url": "https://ffhera-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "ffhera",
+    "storage_bucket": "ffhera.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908008172444:android:3c220fe5483a1f0e45b659",
+        "android_client_info": {
+          "package_name": "com.example.health_emergency_response_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYpXl914rrP9Dyn-Z70eqgNx6FiQPjWWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
