@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:health_emergency_response_app/splash_video_screen.dart';
 import 'package:health_emergency_response_app/welcome_page.dart'; // Import your splash screen widget
 
 void main() {
@@ -17,8 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:
-          const SplashVideoScreen(), // Set the splash screen as the home route
+      home: WelcomePage(), // Set the splash screen as the home route
     );
   }
 

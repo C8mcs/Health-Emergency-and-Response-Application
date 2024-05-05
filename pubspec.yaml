@@ -37,6 +37,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   flutter_native_splash: ^2.3.13
+  flutter_map: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +67,7 @@ flutter:
     - assets/images/logo.png
     - assets\images\glow.png
     - assets\images\button.png
-    - assets\image\send_sos.gif
+    - assets/images/send_sos.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
