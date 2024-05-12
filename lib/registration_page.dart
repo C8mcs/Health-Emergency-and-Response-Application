@@ -1,19 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'firebase_options.dart';
-import 'login_page.dart';
-import 'models/user.dart';
-import 'profile_page.dart';
 
+import 'models/user.dart';
 
 class RegistrationPage extends StatefulWidget {
   final VoidCallback? onRegistrationCompleted;
 
-  const RegistrationPage({Key? key, this.onRegistrationCompleted}) : super(key: key);
+  const RegistrationPage({Key? key, this.onRegistrationCompleted})
+      : super(key: key);
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
@@ -33,15 +28,19 @@ String getErrorMessage(String code) {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _reenterPasswordController = TextEditingController();
-  TextEditingController _contactNumberController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _reenterPasswordController = TextEditingController();
+  final _contactNumberController = TextEditingController();
   bool _registrationFilled = false;
   bool showSpinner = false;
   final _auth = FirebaseAuth.instance;
   late String email;
   late String password;
+  late String firstName;
+  late String lastName;
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +50,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Transform.translate(offset: Offset(0, 50),
+            Transform.translate(
+              offset: const Offset(0, 50),
               child: Text(
                 'Hello, I am',
                 style: TextStyle(
                   fontSize: 45,
                   color: Colors.red.shade700,
                   fontWeight: FontWeight.bold,
-                  shadows: [
+                  shadows: const [
                     Shadow(
                       color: Colors.grey,
                       blurRadius: 10.0,
@@ -69,14 +69,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
             ),
             Transform.translate(
-              offset: Offset(0, 10), // Adjust horizontal translation to minimize space
+              offset: const Offset(
+                  0, 10), // Adjust horizontal translation to minimize space
               child: Text(
                 'HERA',
                 style: TextStyle(
                   fontSize: 90,
                   color: Colors.red.shade700,
                   fontWeight: FontWeight.bold,
-                  shadows: [
+                  shadows: const [
                     Shadow(
                       color: Colors.grey,
                       blurRadius: 10.0,
@@ -87,8 +88,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -20), // Adjust horizontal translation to minimize space
-              child:Text(
+              offset: const Offset(
+                  0, -20), // Adjust horizontal translation to minimize space
+              child: const Text(
                 'Bringing your safety into your\nfingertips',
                 style: TextStyle(
                   fontSize: 15,
@@ -97,20 +99,59 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ),
                 textAlign: TextAlign.center,
                 strutStyle: StrutStyle(
-                  height: 1, // Set the line height to 1 to remove white spaces between lines
+                  height:
+                      1, // Set the line height to 1 to remove white spaces between lines
                 ),
               ),
             ),
-            Transform.translate(offset: Offset(0, -30),
-              child:
-              Padding(
+            Transform.translate(
+              offset: const Offset(0, -30),
+              child: Padding(
                 padding: const EdgeInsets.all(25.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextFormField(
+                      controller: _firstNameController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        fillColor: Colors.red.shade700,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        hintText: 'Enter your First Name',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      onChanged: (value) {
+                        firstName = value;
+                        _checkFormFilled();
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _lastNameController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        fillColor: Colors.red.shade700,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        hintText: 'Enter your Last Name',
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      onChanged: (value) {
+                        lastName = value;
+                        _checkFormFilled();
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
                       controller: _emailController,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         fillColor: Colors.red.shade700,
                         filled: true,
@@ -118,17 +159,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         hintText: 'Enter your email/username',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
                       onChanged: (value) {
                         email = value;
                         _checkFormFilled();
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _passwordController,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         fillColor: Colors.red.shade700,
                         filled: true,
@@ -136,7 +178,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         hintText: 'Enter your password',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
                       obscureText: true,
                       onChanged: (value) {
@@ -144,10 +187,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         _checkFormFilled();
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _reenterPasswordController,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         fillColor: Colors.red.shade700,
                         filled: true,
@@ -155,15 +198,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         hintText: 'Re-enter your Password',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
                       obscureText: true,
                       onChanged: (_) => _checkFormFilled(),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _contactNumberController,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         fillColor: Colors.red.shade700,
                         filled: true,
@@ -171,7 +215,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         hintText: 'Enter Contact Number',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.5)),
                       ),
                       onChanged: (_) => _checkFormFilled(),
                     ),
@@ -179,24 +224,32 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ),
               ),
             ),
-            Transform.translate(offset: Offset(0, -45),
+            Transform.translate(
+              offset: const Offset(0, -45),
               child: ElevatedButton(
                 onPressed: _registrationFilled ? _register : null,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(100, 50),
-                  backgroundColor: _registrationFilled ? Colors.redAccent.shade200 : Colors.grey, // Change color based on _registrationFilled condition
+                  minimumSize: const Size(100, 50),
+                  backgroundColor: _registrationFilled
+                      ? Colors.redAccent.shade200
+                      : Colors
+                          .grey, // Change color based on _registrationFilled condition
                   shadowColor: Colors.black, // Set the shadow color and opacity
                   elevation: 10,
                 ),
-                child: Text(
+                child: const Text(
                   'Register',
-                  style: TextStyle(color: Colors.white), // Set font color to white
+                  style:
+                      TextStyle(color: Colors.white), // Set font color to white
                 ),
-              ),),
-            SizedBox(height: 10,),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             showSpinner
-                ? Center(child: CircularProgressIndicator())
-                : SizedBox(),
+                ? const Center(child: CircularProgressIndicator())
+                : const SizedBox(),
           ],
         ),
       ),
@@ -222,15 +275,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
       if (newUser != null) {
         final user = HeraUser(
           uid: newUser.user!.uid,
+          firstName: firstName,
+          lastName: lastName,
           email: email,
           contactNumber: _contactNumberController.text,
           dateCreated: DateTime.now().toIso8601String(),
         );
-        final userRef = FirebaseFirestore.instance.collection('users').doc(newUser.user!.uid);
+        final userRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(newUser.user!.uid);
         await userRef.set(user.toMap());
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Registration Successful!'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 5),
@@ -239,7 +296,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
         Navigator.popAndPushNamed(context, "/");
       }
-
     } catch (e) {
       setState(() {
         showSpinner = false;
@@ -249,13 +305,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
           SnackBar(
             content: Text(getErrorMessage(e.code)),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 5),
+            duration: const Duration(seconds: 5),
           ),
         );
       } else {
         print("Registration failed due to non-auth error: ${e.toString()}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Registration failed. Please try again.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 5),

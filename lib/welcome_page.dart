@@ -1,20 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'firebase_options.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
-=======
-import 'package:health_emergency_response_app/homepage.dart';
-
-import 'login_page.dart';
->>>>>>> f6c51a4d8b066e608fb5faf07a1fcefd5b4f412c
 import 'registration_page.dart';
 
-Future<void> main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -86,12 +77,9 @@ class _WelcomePageState extends State<WelcomePage> {
               ? ElevatedButton(
                   onPressed: () {
                     // Navigate to login page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Homepage()),
-                    );
+                    _onTabSelected(0);
                   },
-                  child: const Text('Login'),
+                  child: Text('Login'),
                 )
               : BottomNavigationBar(
                   items: const <BottomNavigationBarItem>[
@@ -110,7 +98,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
           Container(
             height: 150,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
                     'assets/images/send_sos.gif'), // Replace 'background_image.png' with your image asset path
@@ -141,9 +129,9 @@ class DifferentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Different Page'),
+        title: Text('Different Page'),
       ),
-      body: const Center(
+      body: Center(
         child: Text(
           'This is a different page!',
           style: TextStyle(fontSize: 24),
