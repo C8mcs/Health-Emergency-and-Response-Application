@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/sos_page.dart';
 import 'firebase_options.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
+import 'preferences_page.dart';
 import 'registration_page.dart';
+import 'temp_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +26,10 @@ class MyApp extends StatelessWidget {
       ),
       home: WelcomePage(),
       routes: {
+        'preferences_screen': (context) => PreferencesScreen(),
         'profile_screen': (context) => ProfilePage(),
+        'sos_screen': (context) => SendSOSPage(),
+        'temp_screen': (context) => TempPage(),
       },
     );
   }

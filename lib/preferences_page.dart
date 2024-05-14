@@ -312,7 +312,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     return Column(
       children: List.generate(
         titles.length,
-        (index) => Container(
+            (index) => Container(
           // margin: EdgeInsets.symmetric(vertical: 0),
           // padding: EdgeInsets.all(1.0),
           color: Color(0xFFFFD9D9D9), // Gray container color
