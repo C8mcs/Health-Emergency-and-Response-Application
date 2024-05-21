@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
 class SendSOSPage extends StatefulWidget {
+  const SendSOSPage({super.key});
 
   @override
   _SendSOSPageState createState() => _SendSOSPageState();
@@ -12,8 +16,12 @@ class SendSOSPage extends StatefulWidget {
 class _SendSOSPageState extends State<SendSOSPage> {
   late MapController _mapController;
   late LocationData _currentLocation;
-  double _zoomLevel = 16;
+  final double _zoomLevel = 16;
   late Location _location;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  DocumentReference? _distressCallRef;
+  late List<Marker> _mapMarkers = [];
+  StreamSubscription<QuerySnapshot>? _locationStreamSubscription;
 
   @override
   void initState() {
@@ -23,12 +31,73 @@ class _SendSOSPageState extends State<SendSOSPage> {
     _currentLocation =
         LocationData.fromMap({'latitude': 10.640960, 'longitude': 122.237747});
 
-    _location.onLocationChanged.listen((LocationData locationData) {
+    final user = FirebaseAuth.instance.currentUser;
+    String? currentUserId;
+    if (user != null) {
+      _distressCallRef = _firestore.collection('distressCalls').doc(user.uid);
+      currentUserId = user.uid;
+    }
+
+    _locationStreamSubscription = _firestore
+        .collection('distressCalls')
+        .snapshots()
+        .listen((querySnapshot) {
+      final markers = <Marker>[];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final double latitude = data['victimLocation'].latitude;
+        final double longitude = data['victimLocation'].longitude;
+        final String documentId = doc.id;
+
+        if (currentUserId != null && currentUserId == documentId){
+          markers.add(
+            Marker(
+              width: 70.0,
+              height: 70.0,
+              point: LatLng(latitude, longitude),
+              child: const Icon(
+                Icons.person_pin_circle,
+                color: Colors.blue,
+              ),
+            ),
+          );
+        }
+        else{
+          markers.add(
+            Marker(
+              width: 40.0,
+              height: 40.0,
+              point: LatLng(latitude, longitude),
+              child: const Icon(
+                Icons.person_pin_circle,
+                color: Colors.red,
+              ),
+            ),
+          );
+        }
+
+      }
       setState(() {
-        _currentLocation = locationData;
+        _mapMarkers.clear();
+        _mapMarkers = markers;
       });
     });
 
+    _location.onLocationChanged.listen((LocationData locationData) {
+      setState(() {
+        _currentLocation = locationData;
+        if (_distressCallRef != null) {
+          final victimLocation = GeoPoint(locationData.latitude!, locationData.longitude!);
+          _distressCallRef!.update({'victimLocation': victimLocation});
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _locationStreamSubscription?.cancel();
+    super.dispose();
   }
 
   void _centerOnMarker() {
@@ -37,6 +106,7 @@ class _SendSOSPageState extends State<SendSOSPage> {
         _zoomLevel);
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -49,11 +119,11 @@ class _SendSOSPageState extends State<SendSOSPage> {
               // Add action for the profile icon here
             },
           ),
-          Expanded(
+          const Expanded(
             child: Center(
               child: Text(
                 'HERA',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -92,54 +162,22 @@ class _SendSOSPageState extends State<SendSOSPage> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              center: LatLng(
+              initialCenter: LatLng(
                   _currentLocation.latitude!, _currentLocation.longitude!),
-              zoom: _zoomLevel,
+              initialZoom: _zoomLevel,
               minZoom: 10.0,
               maxZoom: 18,
             ),
             children: [
               TileLayer(
-                // urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                urlTemplate:
-                'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-                // urlTemplate: 'http://tile.stamen.com/terrain/{z}/{x}/{y}.jpg',
+
+                urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                 // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', dark mode
                 userAgentPackageName: 'com.example.app',
               ),
               MarkerLayer(
-                markers: //_mapMarkers,
-                [
-                  Marker(
-                    width: 40.0,
-                    height: 40.0,
-                    point: LatLng(_currentLocation.latitude!,
-                        _currentLocation.longitude!),
-                    child: const Icon(
-                      Icons.location_pin,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Marker(
-                    width: 40.0,
-                    height: 40.0,
-                    point: LatLng(10.6407, 122.2274),
-                    child: Icon(
-                      Icons.location_pin,
-                      color: Color.fromARGB(255, 59, 200, 8),
-                    ),
-                  ),
-                  const Marker(
-                    width: 40.0,
-                    height: 40.0,
-                    point: LatLng(10.6407, 122.2330),
-                    child: Icon(
-                      Icons.location_pin,
-                      color: Colors.blue,
-                    ),
-                  )
-                ],
+                  markers: _mapMarkers,
               ),
             ],
           ),
@@ -148,24 +186,24 @@ class _SendSOSPageState extends State<SendSOSPage> {
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.red[300],
         unselectedItemColor: Colors.black,
-        items: [
-          const BottomNavigationBarItem(
-            icon: const Icon(Icons.camera),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera),
             label: 'Camera',
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.videocam),
             label: 'Video',
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Profile',
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.mic),
             label: 'Microphone',
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
           ),

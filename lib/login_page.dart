@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Transform.translate(
               offset: const Offset(
-                  0, 10), // Adjust horizontal translation to minimize space
+                  0, 10),
               child: Text(
                 'HERA',
                 style: TextStyle(
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Transform.translate(
               offset: const Offset(
-                  0, -20), // Adjust horizontal translation to minimize space
+                  0, -20),
               child: const Text(
                 'Bringing your safety into your\nfingertips',
                 style: TextStyle(
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                 textAlign: TextAlign.center,
                 strutStyle: StrutStyle(
                   height:
-                      1, // Set the line height to 1 to remove white spaces between lines
+                      1,
                 ),
               ),
             ),
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: _formFilled
                     ? Colors.redAccent.shade200
                     : Colors
-                        .grey, // Change color based on _formFilled condition
+                        .grey,
               ),
               child: const Text('Login', style: TextStyle(color: Colors.white)),
             ),
@@ -160,9 +160,8 @@ class _LoginPageState extends State<LoginPage> {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (userCredential != null) {
-        // Successful Login - Navigate to profile page
         Navigator.pushReplacementNamed(context,
-            '/'); // Replace 'profile_screen' with your actual route name
+            'temp_screen');
       }
     } on FirebaseAuthException catch (e) {
       String message = '';
@@ -172,13 +171,13 @@ class _LoginPageState extends State<LoginPage> {
         message = 'Invalid credentials.';
       } else {
         message =
-            'An error occurred. Please try again.'; // Generic message for other errors
+            'An error occurred. Please try again.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2), // Adjust duration as needed
+          duration: const Duration(seconds: 2),
         ),
       );
     } finally {}

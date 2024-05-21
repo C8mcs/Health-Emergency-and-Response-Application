@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'models/signal.dart';
 
 class TempPage extends StatelessWidget {
@@ -19,7 +20,6 @@ class TempPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                // Navigate to profile page (replace with your actual navigation logic)
                 Navigator.pushNamed(context, 'profile_screen');
               },
               child: Text('Profile'),
@@ -27,8 +27,7 @@ class TempPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navigate to preferences page (replace with your actual navigation logic)
-                Navigator.pushNamed(context, 'preferences_screen'); // Replace with your preference screen route name
+                Navigator.pushNamed(context, 'preferences_screen');
               },
               child: Text('Preferences'),
             ),
@@ -37,13 +36,31 @@ class TempPage extends StatelessWidget {
               onPressed: () async {
                 try{
                   final user = FirebaseAuth.instance.currentUser;
-                  final distressSignal = Signal(
-                    emergencyType: 'Fire',
-                    dateCreated: DateTime.now().toIso8601String(),
-                  );
-                  final signalRef = FirebaseFirestore.instance.collection('helpSignals').doc(user!.uid);
-                  await signalRef.set(distressSignal.toMap());
-                  Navigator.pushNamed(context, 'sos_screen'); // Replace with your preference screen route name
+                  if (user != null) {
+                    Location location = new Location();
+                    LocationData locationData = await location.getLocation();
+                    GeoPoint victimLocation = GeoPoint(
+                        locationData.latitude ?? 0.0,
+                        locationData.longitude ?? 0.0);
+                    Signal helpSignal = Signal(emergencyType: "SOS",
+                        dateCreated: DateTime.now().toString(),
+                        victimLocation: victimLocation);
+
+                    await FirebaseFirestore.instance
+                        .collection('distressCalls')
+                        .doc(user?.uid)
+                        .set(helpSignal.toMap());
+                    Navigator.pushNamed(context,
+                        'sos_screen');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Please log in to send SOS Signal.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 5),
+                      ),
+                    );
+                  }
                 }
                 catch (e){
                   ScaffoldMessenger.of(context).showSnackBar(
