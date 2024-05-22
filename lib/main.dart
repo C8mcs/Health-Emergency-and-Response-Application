@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Homepage(), // Set the splash screen as the home route
+      home: WelcomePage(), // Set the splash screen as the home route
     );
   }
 
