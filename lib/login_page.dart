@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'temp_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -160,8 +162,10 @@ class _LoginPageState extends State<LoginPage> {
           .signInWithEmailAndPassword(email: email, password: password);
 
       if (userCredential != null) {
-        Navigator.pushReplacementNamed(context,
-            'temp_screen');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TempPage()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       String message = '';

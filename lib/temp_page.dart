@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/preferences_page.dart';
+import 'package:health_emergency_response_app/profile_page.dart';
+import 'package:health_emergency_response_app/sos_page.dart';
 import 'package:location/location.dart';
 import 'models/signal.dart';
 
@@ -20,14 +23,20 @@ class TempPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'profile_screen');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
               },
               child: Text('Profile'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'preferences_screen');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PreferencesScreen()),
+                );
               },
               child: Text('Preferences'),
             ),
@@ -50,8 +59,10 @@ class TempPage extends StatelessWidget {
                         .collection('distressCalls')
                         .doc(user?.uid)
                         .set(helpSignal.toMap());
-                    Navigator.pushNamed(context,
-                        'sos_screen');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SendSOSPage()),
+                    );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

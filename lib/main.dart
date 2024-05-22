@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:health_emergency_response_app/homepage.dart';
 import 'package:health_emergency_response_app/welcome_page.dart';
 
 import 'firebase_options.dart';
