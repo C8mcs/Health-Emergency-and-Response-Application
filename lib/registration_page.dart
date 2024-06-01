@@ -83,6 +83,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       textColor: AppColors.tertiaryVariant,
                       textFieldColor: AppColors.secondary,
                       onChanged: (_) => _checkFormFilled(),
+                      suffixIcon: null,
                     ),
                     const SizedBox(height: 10),
                     CustomTextField(
