@@ -9,7 +9,7 @@ class ChangeEmailPage extends StatefulWidget {
 
 class _ChangeEmailPageState extends State<ChangeEmailPage> {
   final TextEditingController _emailController = TextEditingController();
-  String email = '';
+  String _savedEmail = '';
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     try {
       await updateUserEmail(newEmail); // Update email in both FirebaseAuth and Firestore
       setState(() {
-        email = newEmail; // Update saved email state
+        _savedEmail = newEmail; // Update saved email state
       });
       print('Email updated successfully');
     } catch (error) {
@@ -121,7 +121,19 @@ Future<void> updateUserEmail(String newEmail) async {
   final firebaseUser = FirebaseAuth.instance.currentUser;
   if (firebaseUser != null) {
     try {
-      await firebaseUser.verifyBeforeUpdateEmail(newEmail);
+      // Ensure firebaseUser.email is not null before passing it to EmailAuthProvider.credential
+      final currentEmail = firebaseUser.email!;
+
+      // Reauthenticate the user to ensure recent authentication
+      await firebaseUser.reauthenticateWithCredential(
+        EmailAuthProvider.credential(
+          email: currentEmail,
+          password: 'user_password', // Provide user's password here
+        ),
+      );
+
+      // If reauthentication is successful, update email
+      await firebaseUser.updateEmail(newEmail);
       await FirebaseFirestore.instance
           .collection('users')
           .doc(firebaseUser.uid)
@@ -133,3 +145,4 @@ Future<void> updateUserEmail(String newEmail) async {
     }
   }
 }
+
