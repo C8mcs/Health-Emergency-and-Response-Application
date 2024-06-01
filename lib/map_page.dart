@@ -1,4 +1,11 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -8,14 +15,18 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late MapController _mapController;
-  late LocationData _currentLocation;
+  bool isResponder = false;
   final double _zoomLevel = 16;
-  late Location _location;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   DocumentReference? _distressCallRef;
   late List<Marker> _mapMarkers = [];
+  late LocationData _currentLocation;
+  late Location _location;
+  late MapController _mapController;
   StreamSubscription<QuerySnapshot>? _locationStreamSubscription;
+  String mapTemplate = 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+  String victimID = '';
+  String switchText = "User";
 
   @override
   void initState() {
@@ -50,12 +61,13 @@ class _MapScreenState extends State<MapScreen> {
         if (currentUserId != null && currentUserId == documentId){
           markers.add(
             Marker(
-              width: 70.0,
-              height: 70.0,
               point: LatLng(latitude, longitude),
-              child: const Icon(
-                Icons.person_pin_circle,
+              child: IconButton(
+                iconSize: 50,
+                icon: Icon(Icons.person_pin_circle),
                 color: Colors.blue,
+                onPressed: () {
+                },
               ),
             ),
           );
@@ -63,12 +75,19 @@ class _MapScreenState extends State<MapScreen> {
         else{
           markers.add(
             Marker(
-              width: 40.0,
-              height: 40.0,
               point: LatLng(latitude, longitude),
-              child: Icon(
-                Icons.person_pin_circle,
-                color: color,
+              child: IconButton(
+                iconSize: 50,
+                icon: Icon(Icons.person_pin_circle),
+                color: Colors.red,
+                onPressed: () {
+                  print('Marker tapped!');
+                  setState(() {
+                    victimID = doc.id;
+
+
+                  });
+                },
               ),
             ),
           );
@@ -104,10 +123,19 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Color getColorBasedOnDistance(double distance) {
-    final maxDistance = 500.0;
-    int maxOpacity = 255;
-    final shade = maxOpacity * (1 - distance / maxDistance);
-    int opacity = shade.toInt();
+    int opacity;
+    if (distance < 200) {
+      opacity = 250;
+    }
+    else if (distance < 400) {
+      opacity = 150;
+    }
+    else if (distance < 600){
+      opacity = 50;
+    }
+    else {
+      opacity = 0;
+    }
     return Color.fromARGB(opacity, 255, 0, 0);
   }
 
@@ -120,14 +148,65 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Map'),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end, // Align to bottom
+
+        children: [
+          Align(
+            alignment: Alignment(1.0, 1.0),
+            child: FloatingActionButton(
+              onPressed: _centerOnMarker,
+              child: const Icon(Icons.my_location),
+            ),
+          ),
+          Align(
+            alignment: Alignment(1.0, 1.0),
+            child:
+            Container( // Wrap SwitchListTile for size control
+              width: 175, // Set a fixed width
+              child: Builder( // Wrap with Builder for rebuild on state change
+                builder: (context) => SwitchListTile(
+                  tileColor: Colors.red,
+                  title: Text(switchText),
+                  value: isResponder,
+                  onChanged: (bool value) {
+                    setState(() {
+                      isResponder = value;
+                      mapTemplate = isResponder? 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=a1f757577b5e4d33a9ea5bd8bccffd02' : 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+                      switchText = isResponder ? "Responder" : "User";
+                    });
+                  },
+                ),
+              ),
+            ),
+          )
+        ],
       ),
-      body: Center(
-        child: Text(
-          'Temporary Map Screen',
-          style: TextStyle(fontSize: 20),
-        ),
+
+      body: Stack(
+        children: [
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: LatLng(
+                  _currentLocation.latitude!, _currentLocation.longitude!),
+              initialZoom: _zoomLevel,
+              minZoom: 10.0,
+              maxZoom: 18,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: mapTemplate,
+                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', dark mode
+                userAgentPackageName: 'com.example.app',
+              ),
+              MarkerLayer(
+                markers: _mapMarkers,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
