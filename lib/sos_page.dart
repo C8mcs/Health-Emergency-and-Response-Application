@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
@@ -47,6 +48,10 @@ class _SendSOSPageState extends State<SendSOSPage> {
         final data = doc.data();
         final double latitude = data['victimLocation'].latitude;
         final double longitude = data['victimLocation'].longitude;
+        final double distance = calculateDistance(
+            LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
+            LatLng(latitude, longitude));
+        final color = getColorBasedOnDistance(distance);
         final String documentId = doc.id;
 
         if (currentUserId != null && currentUserId == documentId){
@@ -68,14 +73,13 @@ class _SendSOSPageState extends State<SendSOSPage> {
               width: 40.0,
               height: 40.0,
               point: LatLng(latitude, longitude),
-              child: const Icon(
+              child: Icon(
                 Icons.person_pin_circle,
-                color: Colors.red,
+                color: color,
               ),
             ),
           );
         }
-
       }
       setState(() {
         _mapMarkers.clear();
@@ -98,6 +102,20 @@ class _SendSOSPageState extends State<SendSOSPage> {
   void dispose() {
     _locationStreamSubscription?.cancel();
     super.dispose();
+  }
+
+  double calculateDistance(LatLng point1, LatLng point2) {
+    final double distanceInMeters = Geolocator.distanceBetween(
+        point1.latitude, point1.longitude, point2.latitude, point2.longitude);
+    return distanceInMeters;
+  }
+
+  Color getColorBasedOnDistance(double distance) {
+    final maxDistance = 500.0;
+    int maxOpacity = 255;
+    final shade = maxOpacity * (1 - distance / maxDistance);
+    int opacity = shade.toInt();
+    return Color.fromARGB(opacity, 255, 0, 0);
   }
 
   void _centerOnMarker() {

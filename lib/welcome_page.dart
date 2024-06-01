@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:health_emergency_response_app/sos_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'firebase_options.dart';
 import 'login_page.dart';
 import 'profile_page.dart';
@@ -13,6 +14,21 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  var locationStatus = await Permission.location.request();
+  var phoneStatus = await Permission.phone.request();
+  var cameraStatus = await Permission.camera.request();
+  var microphoneStatus = await Permission.microphone.request();
+
+  if (locationStatus.isGranted &&
+      phoneStatus.isGranted &&
+      cameraStatus.isGranted &&
+      microphoneStatus.isGranted) {
+    print('All permissions granted!');
+  } else {
+    print('Some permissions denied.');
+  }
+
   runApp(MyApp());
 }
 
