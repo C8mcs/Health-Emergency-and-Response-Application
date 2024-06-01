@@ -45,6 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Initial visibility of additional information
   bool additionalInfoVisible = true;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -71,6 +72,25 @@ class _ProfilePageState extends State<ProfilePage> {
       } catch (e) {
         print('Error fetching user data: $e');
       }
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // Handle navigation logic here based on the selected index
+    switch (_selectedIndex) {
+      case 0:
+        // Navigate to Profile Page (already here)
+        break;
+      case 1:
+        // Navigate to another page
+        break;
+      case 2:
+        // Navigate to another page
+        break;
     }
   }
 
@@ -256,6 +276,25 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.redAccent,
+        onTap: _onItemTapped,
       ),
     );
   }
