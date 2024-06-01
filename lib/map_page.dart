@@ -15,14 +15,17 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late MapController _mapController;
-  late LocationData _currentLocation;
+  bool isResponder = false;
   final double _zoomLevel = 16;
-  late Location _location;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   DocumentReference? _distressCallRef;
   late List<Marker> _mapMarkers = [];
+  late LocationData _currentLocation;
+  late Location _location;
+  late MapController _mapController;
   StreamSubscription<QuerySnapshot>? _locationStreamSubscription;
+  String mapTemplate = 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+  String switchText = "User";
 
   @override
   void initState() {
@@ -128,15 +131,40 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.end, // Align to bottom
+
         children: [
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            onPressed: _centerOnMarker,
-            child: const Icon(Icons.my_location),
+          Align(
+            alignment: Alignment(1.0, 1.0),
+            child: FloatingActionButton(
+              onPressed: _centerOnMarker,
+              child: const Icon(Icons.my_location),
+            ),
           ),
+          Align(
+          alignment: Alignment(1.0, 1.0),
+          child:
+            Container( // Wrap SwitchListTile for size control
+              width: 175, // Set a fixed width
+              child: Builder( // Wrap with Builder for rebuild on state change
+                builder: (context) => SwitchListTile(
+                  tileColor: Colors.red,
+                  title: Text(switchText),
+                  value: isResponder,
+                  onChanged: (bool value) {
+                    setState(() {
+                      isResponder = value;
+                      mapTemplate = isResponder? 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=a1f757577b5e4d33a9ea5bd8bccffd02' : 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+                      switchText = isResponder ? "Responder" : "User";
+                    });
+                  },
+                ),
+              ),
+            ),
+          )
         ],
       ),
+
       body: Stack(
         children: [
           FlutterMap(
@@ -150,8 +178,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
             children: [
               TileLayer(
-
-                urlTemplate: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                urlTemplate: mapTemplate,
                 // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
                 // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', dark mode
                 userAgentPackageName: 'com.example.app',
