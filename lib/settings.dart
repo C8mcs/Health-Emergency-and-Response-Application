@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:health_emergency_response_app/login_page.dart';
 import 'user_pref.dart';
 import 'change_pw.dart';
-import 'change_username.dart';
+import 'change_email.dart';
 import 'logout.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,11 +32,11 @@ class SettingsPage extends StatelessWidget {
           children: <Widget>[
             SettingsMenuItem(
               icon: Icons.person,
-              text: 'Change Username',
+              text: 'Change Email',
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ChangeUsernamePage()),
+                  MaterialPageRoute(builder: (context) => ChangeEmailPage()),
                 );
               },
             ),
@@ -83,7 +84,7 @@ class SettingsPage extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                           ),
-                          child: Text('Logout'),
+                          child: Text('Logout', style: TextStyle(color: Colors.white),),
                         ),
                       ],
                     );
