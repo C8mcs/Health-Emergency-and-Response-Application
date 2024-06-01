@@ -24,10 +24,13 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: Padding(
+        padding: EdgeInsets.only(left: 10),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            SizedBox(height: 20,),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -37,6 +40,7 @@ class SettingsPage extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
+                foregroundColor: Color(0xFFF24171),
                 shadowColor: Colors.black,
                 elevation: 10.0,
                 shape: RoundedRectangleBorder(
@@ -44,16 +48,12 @@ class SettingsPage extends StatelessWidget {
                   side: BorderSide(color: Color(0xFFF24171), width: 2.0),
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: 30.0, right: 30, top: 5, bottom: 5),
-                child: Text(
-                  'Change Username',
-                  style: TextStyle(fontSize: 28, color: Color(0xFFF24171)),
-                ),
+              child: Text(
+                'Change Username',
+                style: TextStyle(fontSize: 24),
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(height: 10,),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -63,6 +63,7 @@ class SettingsPage extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
+                foregroundColor: Color(0xFFF24171),
                 shadowColor: Colors.black,
                 elevation: 10.0,
                 shape: RoundedRectangleBorder(
@@ -70,16 +71,12 @@ class SettingsPage extends StatelessWidget {
                   side: BorderSide(color: Color(0xFFF24171), width: 2.0),
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: 30.0, right: 30, top: 5, bottom: 5),
-                child: Text(
-                  'Change Password',
-                  style: TextStyle(fontSize: 28, color: Color(0xFFF24171)),
-                ),
+              child: Text(
+                'Change Password',
+                style: TextStyle(fontSize: 24),
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(height: 10,),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -89,6 +86,7 @@ class SettingsPage extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
+                foregroundColor: Color(0xFFF24171),
                 shadowColor: Colors.black,
                 elevation: 10.0,
                 shape: RoundedRectangleBorder(
@@ -96,18 +94,12 @@ class SettingsPage extends StatelessWidget {
                   side: BorderSide(color: Color(0xFFF24171), width: 2.0),
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: 65.0, right: 65.0, top: 5, bottom: 5),
-                child: Text(
-                  'Preferences',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 28, color: Color(0xFFF24171),
-                  ),
-                ),
+              child: Text(
+                'Preferences',
+                style: TextStyle(fontSize: 24),
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(height: 10,),
             ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -122,16 +114,19 @@ class SettingsPage extends StatelessWidget {
                           onPressed: () {
                             Navigator.of(context).pop(); // Close the dialog
                           },
-                          child: Text('Cancel', style: TextStyle(color: Color(0xFFBD2D29))),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFFFFF),
+                          ),
+                          child: Text('Cancel', style: TextStyle(color: Colors.white),),
                         ),
                         ElevatedButton(
                           onPressed: () {
                             logout(context);  // go back to login page
                           },
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFBD2D29)), // Set background color
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFBD2D29),
                           ),
-                          child: Text('Logout', style: TextStyle(color: Colors.white)),
+                          child: Text('Logout', style: TextStyle(color: Colors.white),),
                         ),
                       ],
                     );
@@ -140,6 +135,7 @@ class SettingsPage extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFF24171),
+                foregroundColor: Colors.white,
                 shadowColor: Colors.black,
                 elevation: 10.0,
                 shape: RoundedRectangleBorder(
@@ -147,15 +143,9 @@ class SettingsPage extends StatelessWidget {
                   side: BorderSide(color: Colors.white, width: 2.0),
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: 65.0, right: 65.0, top: 5, bottom: 5),
-                child: Text(
-                  'Logout',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 28, color: Colors.white,
-                  ),
-                ),
+              child: Text(
+                'Logout',
+                style: TextStyle(fontSize: 24),
               ),
             ),
           ],

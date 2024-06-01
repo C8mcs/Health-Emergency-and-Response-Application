@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:health_emergency_response_app/logout.dart';
 import 'reusables/custom_widget_profile_page.dart';
@@ -152,11 +153,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     visible: !additionalInfoVisible,
                     child: Column(
                       children: [
+                        SizedBox(height: 30,),
                         const Text(
                           'User Info',
                           style: TextStyle(
                             color: Color(0xFFD92B4B),
-                            fontSize: 20,
+                            fontSize: 20, fontWeight: FontWeight.bold,
                           ),
                         ),
                         Row(

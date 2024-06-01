@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -8,6 +12,49 @@ class ChangePasswordPage extends StatefulWidget {
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
   String _savedPassword = '';
+
+  @override
+  void initState(){
+    super.initState();
+    _fetch();
+  }
+
+  _fetch() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null){
+      try {
+        final userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+        if (userData.exists){
+          setState(() {
+            _passwordController.text = userData['password'];
+          });
+        }
+      }
+      catch (e){
+        print('Error fetching user data: $e');
+    }
+    }
+  }
+
+  Future<void> _savePassword() async{
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null){
+      try{
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .update({
+         'password': _passwordController.text,
+        });
+        print('Password updated successfully.');
+      } catch(e){
+
+    }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

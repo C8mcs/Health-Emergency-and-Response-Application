@@ -15,13 +15,24 @@ class _PreferencesPageState extends State<PreferencesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Preferences'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Preferences',
+                style: TextStyle(fontWeight: FontWeight.bold,
+                  fontSize: 24,),),
+            ),
+            Container(
+              height: 0.5,
+              width: 1000,
+                color: Colors.black,
+            ),
+            SizedBox(height: 20 ,),
             SwitchListTile(
               title: Text('Dark Mode'),
               value: _darkMode,
@@ -30,6 +41,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
                   _darkMode = value;
                 });
               },
+            ),
+            Container(
+              height: 0.2,
+              width: 1000,
+              color: Colors.black.withOpacity(0.5),
             ),
             ListTile(
               title: Text('Color Scheme'),
@@ -49,6 +65,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
                 }).toList(),
               ),
             ),
+            Container(
+              height: 0.2,
+              width: 1000,
+              color: Colors.black.withOpacity(0.5),
+            ),
             SwitchListTile(
               title: Text('Voice Activation'),
               value: _voiceActivation,
@@ -57,6 +78,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
                   _voiceActivation = value;
                 });
               },
+            ),
+            Container(
+              height: 0.2,
+              width: 1000,
+              color: Colors.black.withOpacity(0.5),
             ),
             ListTile(
               title: Text('Language'),
@@ -75,6 +101,11 @@ class _PreferencesPageState extends State<PreferencesPage> {
                   );
                 }).toList(),
               ),
+            ),
+            Container(
+              height: 0.2,
+              width: 1000,
+              color: Colors.black.withOpacity(0.5),
             ),
           ],
         ),
