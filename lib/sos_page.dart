@@ -7,14 +7,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
-class SendSOSPage extends StatefulWidget {
-  const SendSOSPage({super.key});
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
 
   @override
-  _SendSOSPageState createState() => _SendSOSPageState();
+  _MapScreenState createState() => _MapScreenState();
 }
 
-class _SendSOSPageState extends State<SendSOSPage> {
+class _MapScreenState extends State<MapScreen> {
   late MapController _mapController;
   late LocationData _currentLocation;
   final double _zoomLevel = 16;
@@ -127,44 +127,6 @@ class _SendSOSPageState extends State<SendSOSPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Send SOS'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              // Add action for the profile icon here
-            },
-          ),
-          const Expanded(
-            child: Center(
-              child: Text(
-                'HERA',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  child: Text('Preferences'),
-                ),
-                const PopupMenuItem(
-                  child: Text('Guide'),
-                ),
-                const PopupMenuItem(
-                  child: Text('About the Developer'),
-                ),
-              ];
-            },
-          ),
-        ],
-      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -198,32 +160,6 @@ class _SendSOSPageState extends State<SendSOSPage> {
                   markers: _mapMarkers,
               ),
             ],
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.red[300],
-        unselectedItemColor: Colors.black,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera),
-            label: 'Camera',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.videocam),
-            label: 'Video',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mic),
-            label: 'Microphone',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
           ),
         ],
       ),
