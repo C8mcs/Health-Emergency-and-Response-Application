@@ -30,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
     _mapController = MapController();
     _location = Location();
     _currentLocation =
-        LocationData.fromMap({'latitude': 10.640960, 'longitude': 122.237747});
+        LocationData.fromMap({'latitude': 10.6406, 'longitude': 122.2303});
 
     final user = FirebaseAuth.instance.currentUser;
     String? currentUserId;
