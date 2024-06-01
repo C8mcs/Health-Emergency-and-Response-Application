@@ -95,7 +95,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     if (_emailError.isNotEmpty)
                       Text(
                         _emailError,
-                        style: const TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.yellow),
                       ),
                     const SizedBox(height: 10),
                     CustomTextField(
@@ -247,7 +247,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(getErrorMessage(e.code)),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.secondary,
             duration: const Duration(seconds: 5),
           ),
         );
