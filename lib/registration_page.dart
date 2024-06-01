@@ -216,6 +216,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           _passwordController.text == _reenterPasswordController.text &&
           isPasswordValid;
 
+      isContactNumberValid;
       _emailError = _emailController.text.isNotEmpty &&
               !_emailController.text.endsWith('@gmail.com')
           ? 'Email must end with @gmail.com'
