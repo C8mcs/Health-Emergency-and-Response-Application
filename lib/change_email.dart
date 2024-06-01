@@ -9,44 +9,129 @@ class ChangeEmailPage extends StatefulWidget {
 
 class _ChangeEmailPageState extends State<ChangeEmailPage> {
   final TextEditingController _emailController = TextEditingController();
-  String _savedEmail = '';
+  String? _currentUserEmail;
 
   @override
   void initState() {
     super.initState();
-    _fetch();
+    _fetchCurrentUserEmail();
   }
 
-  _fetch() async {
-    final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null) {
-      try {
-        final userData = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(firebaseUser.uid)
-            .get();
-        if (userData.exists) {
-          setState(() {
-            _emailController.text = userData['info']['email']; // Corrected accessing email field
-          });
-        }
-      } catch (e) {
-        print('Error fetching user data: $e');
-      }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _fetchCurrentUserEmail() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null && mounted) {
+      setState(() {
+        _currentUserEmail = currentUser.email;
+      });
     }
   }
 
   Future<void> _saveEmail() async {
-    final newEmail = _emailController.text;
-    try {
-      await updateUserEmail(newEmail); // Update email in both FirebaseAuth and Firestore
-      setState(() {
-        _savedEmail = newEmail; // Update saved email state
-      });
-      print('Email updated successfully');
-    } catch (error) {
-      print('Failed to update user email: $error');
+    final newEmail = _emailController.text.trim();
+    if (newEmail.isEmpty) {
+      _showMessage('Please enter a new email.');
+      return;
     }
+
+    final password = await _getPasswordFromUser();
+    if (password != null) {
+      try {
+        await _reauthenticateUser(password);
+        debugPrint('User re-authenticated successfully.');
+
+        await _sendEmailChangeRequest(newEmail);
+        debugPrint('Email change request sent.');
+
+        _showMessage('Email change request sent. Check your email for the verification link.');
+      } catch (error) {
+        _showMessage('Failed to send email change request: $error');
+        debugPrint('Error in email change request: $error');
+      }
+    } else {
+      _showMessage('Password is required to change the email.');
+    }
+  }
+
+  Future<String?> _getPasswordFromUser() async {
+    final TextEditingController passwordController = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Re-authenticate'),
+          content: TextField(
+            controller: passwordController,
+            decoration: InputDecoration(
+              labelText: 'Enter your password',
+            ),
+            obscureText: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Submit'),
+              onPressed: () {
+                Navigator.of(context).pop(passwordController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _reauthenticateUser(String password) async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      final credential = EmailAuthProvider.credential(
+        email: firebaseUser.email!,
+        password: password,
+      );
+      await firebaseUser.reauthenticateWithCredential(credential);
+      debugPrint('Re-authentication successful.');
+    } else {
+      debugPrint('No current user found.');
+    }
+  }
+
+  Future<void> _sendEmailChangeRequest(String newEmail) async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      try {
+        await firebaseUser.verifyBeforeUpdateEmail(newEmail);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .update({
+          'info.email': newEmail,
+        });
+        debugPrint('Email update in Firestore successful.');
+      } catch (error) {
+        debugPrint('Error in updating email: $error');
+        throw error;
+      }
+    } else {
+      debugPrint('No current user found.');
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -65,22 +150,25 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
             children: <Widget>[
               SizedBox(height: 70),
               Text(
-                'New Email',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                'Current Email:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               Text(
-                'You will be changing your email.\nType your new email address on the text field below.\n\n',
+                _currentUserEmail ?? 'Loading...', // Display current user's email
+                style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 30),
+              Text(
+                'New Email:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              SizedBox(height: 10),
               Container(
                 color: Colors.grey[200],
                 child: TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: 'New Email',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    hintText: 'Enter your new email',
-                    hintStyle: TextStyle(color: Colors.grey),
+                    labelText: 'Enter New Email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -116,33 +204,3 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     );
   }
 }
-
-Future<void> updateUserEmail(String newEmail) async {
-  final firebaseUser = FirebaseAuth.instance.currentUser;
-  if (firebaseUser != null) {
-    try {
-      // Ensure firebaseUser.email is not null before passing it to EmailAuthProvider.credential
-      final currentEmail = firebaseUser.email!;
-
-      // Reauthenticate the user to ensure recent authentication
-      await firebaseUser.reauthenticateWithCredential(
-        EmailAuthProvider.credential(
-          email: currentEmail,
-          password: 'user_password', // Provide user's password here
-        ),
-      );
-
-      // If reauthentication is successful, update email
-      await firebaseUser.updateEmail(newEmail);
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(firebaseUser.uid)
-          .update({
-        'info.email': newEmail,
-      });
-    } catch (error) {
-      throw error;
-    }
-  }
-}
-
