@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
             userWeight.text = userData['weight'];
             userAge.text = userData['age'];
             userSex.text = userData['sex'];
-            userBloodType.text = userData['bloodType'];
+            selectedBloodType = userData['bloodType'];
             userAddress.text = userData['address'];
             emergencyContactName.text = userData['emergencyContactName'];
             emergencyContactNumber.text = userData['emergencyContactNumber'];
@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
           'weight': userWeight.text,
           'age': userAge.text,
           'sex': userSex.text,
-          'bloodType': userBloodType.text,
+          'bloodType': selectedBloodType,
           'address': userAddress.text,
           'emergencyContactName': emergencyContactName.text,
           'emergencyContactNumber': emergencyContactNumber.text,
@@ -126,24 +126,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD92B4B),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: Container(
-          width: 100,
-          height: 100,
-          child: IconButton(
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.black,
-            ),
-            onPressed: () {
-              AuthService.logout(context);
-            },
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-      ),
       body: SafeArea(
         child: GestureDetector(
           onVerticalDragUpdate: (details) {
@@ -256,12 +238,55 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                             Expanded(
-                              child: CustomTextField(
-                                labelText: 'Blood Type',
-                                controller: userBloodType,
-                                fillColor: fillColorRed,
-                                enabled: false,
-                                readOnly: true,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Blood Type',
+                                      style: TextStyle(
+                                        color: fillColorRed,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    TextFormField(
+                                      controller: TextEditingController(
+                                          text: selectedBloodType ?? ''),
+                                      enabled: false,
+                                      readOnly: true,
+                                      style: TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        labelText: 'Blood Type',
+                                        labelStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                        filled: true,
+                                        fillColor: fillColorRed,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: fillColorRed,
+                                            width: 2,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: fillColorRed,
+                                            width: 2,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -273,6 +298,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               fontSize: 30,
                               color: Color(0xFFD92B4B)),
                         ),
+                        SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -459,6 +485,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabled: true,
                             readOnly: false,
                           ),
+                          SizedBox(height: 10),
                           const Divider(
                             thickness: 10,
                           ),
@@ -498,6 +525,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabled: true,
                             readOnly: false,
                           ),
+                          SizedBox(height: 10),
                           const Divider(
                             height: 20,
                             thickness: 10,
@@ -575,7 +603,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                               Text(
                                                   "Sex at Birth: ${userSex.text}"),
                                               Text(
-                                                  "Blood Type: ${userBloodType.text}"),
+                                                  "Blood Type: ${selectedBloodType}"),
                                               Text(
                                                   "Address: ${userAddress.text}"),
                                               Text(
