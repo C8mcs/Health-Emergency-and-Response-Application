@@ -14,7 +14,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
   @override
   void initState() {
     super.initState();
-    _fetchCurrentUserEmail();
+    _fetch();
   }
 
   @override
@@ -23,7 +23,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     super.dispose();
   }
 
-  void _fetchCurrentUserEmail() {
+  void _fetch() {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null && mounted) {
       setState(() {
@@ -33,7 +33,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
   }
 
   Future<void> _saveEmail() async {
-    final newEmail = _emailController.text.trim();
+    final newEmail = _emailController.text;
     if (newEmail.isEmpty) {
       _showMessage('Please enter a new email.');
       return;
@@ -43,15 +43,10 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     if (password != null) {
       try {
         await _reauthenticateUser(password);
-        debugPrint('User re-authenticated successfully.');
-
-        await _sendEmailChangeRequest(newEmail);
-        debugPrint('Email change request sent.');
-
+        await sendEmailChangeRequest(newEmail);
         _showMessage('Email change request sent. Check your email for the verification link.');
       } catch (error) {
         _showMessage('Failed to send email change request: $error');
-        debugPrint('Error in email change request: $error');
       }
     } else {
       _showMessage('Password is required to change the email.');
@@ -101,13 +96,10 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
         password: password,
       );
       await firebaseUser.reauthenticateWithCredential(credential);
-      debugPrint('Re-authentication successful.');
-    } else {
-      debugPrint('No current user found.');
     }
   }
 
-  Future<void> _sendEmailChangeRequest(String newEmail) async {
+  Future<void> sendEmailChangeRequest(String newEmail) async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
       try {
@@ -116,15 +108,11 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
             .collection('users')
             .doc(firebaseUser.uid)
             .update({
-          'info.email': newEmail,
+          'email': newEmail,
         });
-        debugPrint('Email update in Firestore successful.');
       } catch (error) {
-        debugPrint('Error in updating email: $error');
         throw error;
       }
-    } else {
-      debugPrint('No current user found.');
     }
   }
 
