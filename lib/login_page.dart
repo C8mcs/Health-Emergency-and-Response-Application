@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:health_emergency_response_app/profile_page.dart';
+import 'package:health_emergency_response_app/homepage.dart';
 
 import 'app_constants.dart';
 import 'registration_page.dart';
@@ -202,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
       if (userCredential != null) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     } on FirebaseAuthException catch (e) {
