@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -11,49 +9,78 @@ class ChangePasswordPage extends StatefulWidget {
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _oldPasswordController = TextEditingController();
   String _savedPassword = '';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _fetch();
   }
 
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _oldPasswordController.dispose();
+    super.dispose();
+  }
+
   _fetch() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null){
+    if (firebaseUser != null) {
       try {
         final userData = await FirebaseFirestore.instance
             .collection('users')
             .doc(firebaseUser.uid)
             .get();
-        if (userData.exists){
+        if (userData.exists) {
           setState(() {
             _passwordController.text = userData['password'];
           });
         }
-      }
-      catch (e){
+      } catch (e) {
         print('Error fetching user data: $e');
-    }
+      }
     }
   }
 
-  Future<void> _savePassword() async{
+  Future<void> _savePassword() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null){
-      try{
+    if (firebaseUser != null) {
+      try {
+        // Check if old password matches
+        final oldPassword = _oldPasswordController.text;
+        final credential = EmailAuthProvider.credential(
+          email: firebaseUser.email!,
+          password: oldPassword,
+        );
+        await firebaseUser.reauthenticateWithCredential(credential);
+
+        // Update password in Firebase Authentication
+        final newPassword = _passwordController.text;
+        await firebaseUser.updatePassword(newPassword);
+
+        // Update password in Firestore
         await FirebaseFirestore.instance
             .collection('users')
             .doc(firebaseUser.uid)
             .update({
-         'password': _passwordController.text,
+          'password': newPassword,
         });
-        print('Password updated successfully.');
-      } catch(e){
 
+        print('Password updated successfully.');
+        _showMessage('Password updated successfully.');
+      } catch (e) {
+        print('Error updating password: $e');
+        _showMessage('Error updating password: $e');
+      }
     }
-    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -61,7 +88,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: Colors.red[50],
       appBar: AppBar(
-        title: Text('Change Username'),
+        title: Text('Change Password'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -80,15 +107,37 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               SizedBox(height: 30,),
               Container(
-                color: Colors.grey[200], // Set the background color here
+                color: Colors.grey[200],
                 child: TextField(
-                  controller: _passwordController, // Use the controller to get the entered password
+                  controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'New Password',
-                    labelStyle: TextStyle(color: Colors.grey), // Color of the label text
+                    labelStyle: TextStyle(color: Colors.grey),
                     hintText: 'Enter your new password',
-                    hintStyle: TextStyle(color: Colors.grey), // Color of the hint text
-                    border: OutlineInputBorder( // Border around the text field
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  obscureText: true,
+                ),
+              ),
+              SizedBox(height: 20,),
+              Text(
+                'Old Password',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+              ),
+              SizedBox(height: 10,),
+              Container(
+                color: Colors.grey[200],
+                child: TextField(
+                  controller: _oldPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'Old Password',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    hintText: 'Enter your old password',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
@@ -99,9 +148,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Check if the length of the entered password is less than or equal to 5
                     if (_passwordController.text.length <= 5) {
-                      // Show an alert dialog to inform the user that the password is too short
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -111,7 +158,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             actions: [
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('OK'),
                               ),
@@ -120,7 +167,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         },
                       );
                     } else {
-                      // Show an alert dialog before saving the new password
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -130,18 +176,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('Cancel'),
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  setState(() {
-                                    _savedPassword = _passwordController.text;
-                                  });
-                                  print('Saved Password: $_savedPassword');
-                                  // Here you can add the logic to save the new password
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  _savePassword(); // Save the new password
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text('Save'),
                               ),
@@ -161,13 +203,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 10, right: 10.0, top: 5, bottom: 5),
+                    padding: EdgeInsets.only(left: 10, right: 10.0, top: 5, bottom: 5),
                     child: Text(
                       'Save',
                       textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 14, color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
                 ),
