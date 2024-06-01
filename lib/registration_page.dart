@@ -43,6 +43,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   bool _registrationFilled = false;
   bool _showSpinner = false;
   String _emailError = '';
+  String _contactNumError = '';
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -127,6 +128,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       textFieldColor: AppColors.secondary,
                       onChanged: (_) => _checkFormFilled(),
                     ),
+                    if (_contactNumError.isNotEmpty)
+                      Text(
+                        _contactNumError,
+                        style: const TextStyle(color: Colors.yellow),
+                      ),
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () {
@@ -182,6 +188,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   void _checkFormFilled() {
     setState(() {
+      bool isContactNumberValid =
+          RegExp(r'^09[0-9]{9}$').hasMatch(_contactNumberController.text);
       _registrationFilled = _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
@@ -195,6 +203,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
               !_emailController.text.endsWith('@gmail.com')
           ? 'Email must end with @gmail.com'
           : '';
+      _contactNumError =
+          _contactNumberController.text.isNotEmpty && !isContactNumberValid
+              ? 'Contact number must start with 09 and be exactly 11 digits'
+              : '';
     });
   }
 
