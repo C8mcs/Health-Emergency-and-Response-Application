@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/login_page.dart';
 // Import the MyApp widget
 import 'package:video_player/video_player.dart';
-
-import 'welcome_page.dart';
 
 class SplashVideoScreen extends StatefulWidget {
   const SplashVideoScreen({super.key});
@@ -26,7 +25,7 @@ class _SplashVideoScreenState extends State<SplashVideoScreen> {
           if (_controller.value.isInitialized && !_controller.value.isPlaying) {
             // Navigate to the root widget (MyApp) after the splash screen
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => WelcomePage()),
+              MaterialPageRoute(builder: (context) => const LoginPage()),
             );
           }
         });

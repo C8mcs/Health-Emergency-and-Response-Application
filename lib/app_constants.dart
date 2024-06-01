@@ -62,6 +62,20 @@ class AppTextStyles {
     fontSize: 12,
     color: const Color(0xFF656573),
   );
+
+  static final TextStyle bodyHintTexts = GoogleFonts.getFont(
+    _fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 10,
+    color: const Color(0xFFF2F2F2),
+  );
+
+  static final TextStyle bodyHintTexts2 = GoogleFonts.getFont(
+    _fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 10,
+    color: const Color(0x00008ecc),
+  );
 }
 
 class AppColors {

@@ -49,6 +49,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -71,6 +72,7 @@ dependencies {
     // Add the dependency for the Realtime Database library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-database")
+    implementation("androidx.multidex:multidex:2.0.1")
 }
 
 //apply plugin: 'com.google.gms.google-services'

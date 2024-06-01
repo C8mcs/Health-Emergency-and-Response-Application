@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/profile_page.dart';
 
 import 'app_constants.dart';
+import 'registration_page.dart';
 import 'reusables/form_constants.dart';
 import 'reusables/logo.dart';
-import 'temp_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -132,6 +134,35 @@ class _LoginPageState extends State<LoginPage> {
                             _checkFormFilled();
                           },
                         ),
+                        const SizedBox(height: 10),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Don't have an account yet? ",
+                                style: AppTextStyles.bodyHintTexts,
+                              ),
+                              TextSpan(
+                                text: 'Register here.',
+                                style: const TextStyle(color: Colors.blue),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // Navigate to the registration page
+                                    showModalBottomSheet(
+                                        context: context,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (context) => const ClipRRect(
+                                              borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(20.0),
+                                                topRight: Radius.circular(20.0),
+                                              ),
+                                              child: RegistrationPage(),
+                                            ));
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: _formFilled ? _login : null,
@@ -171,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
       if (userCredential != null) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TempPage()),
+          MaterialPageRoute(builder: (context) => const ProfilePage()),
         );
       }
     } on FirebaseAuthException catch (e) {
