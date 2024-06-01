@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:health_emergency_response_app/welcome_page.dart';
+import 'package:health_emergency_response_app/login_page.dart'; // Import the login page
 
 import 'firebase_options.dart';
 
@@ -24,14 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: WelcomePage(), // Set the splash screen as the home route
-    );
-  }
-
-  void _navigateToLoginPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => WelcomePage()),
+      home: LoginPage(), // Directly set the login page as the home route
     );
   }
 }
