@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:health_emergency_response_app/logout.dart';
+import 'reusables/custom_widget_profile_page.dart';
 
 void main() {
   runApp(const ProfileApp());
@@ -30,8 +31,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // User Profile variables
   TextEditingController userHeight = TextEditingController();
   TextEditingController userWeight = TextEditingController();
-  late var firstName = TextEditingController();
-  var lastName = TextEditingController();
+  TextEditingController firstName = TextEditingController();
+  TextEditingController lastName = TextEditingController();
   TextEditingController userAge = TextEditingController();
   TextEditingController userSex = TextEditingController();
   TextEditingController userBloodType = TextEditingController();
@@ -43,9 +44,12 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController userAllergies = TextEditingController();
   TextEditingController userMedications = TextEditingController();
 
+  final Color fillColorRed = Color(0xFFD92B4B);
+  final Color fillColorGray = Color(0xFF666573);
+
   // Initial visibility of additional information
-  bool additionalInfoVisible = true;
-  int _selectedIndex = 0;
+  bool additionalInfoVisible = false;
+  String? selectedBloodType;
 
   @override
   void initState() {
@@ -65,8 +69,18 @@ class _ProfilePageState extends State<ProfilePage> {
           setState(() {
             firstName.text = userData['firstName'];
             lastName.text = userData['lastName'];
-
-            // Update other text controllers similarly
+            userHeight.text = userData['height'];
+            userWeight.text = userData['weight'];
+            userAge.text = userData['age'];
+            userSex.text = userData['sex'];
+            userBloodType.text = userData['bloodType'];
+            userAddress.text = userData['address'];
+            emergencyContactName.text = userData['emergencyContactName'];
+            emergencyContactNumber.text = userData['emergencyContactNumber'];
+            emergencyContactAddress.text = userData['emergencyContactAddress'];
+            userMedicalCond.text = userData['medicalConditions'];
+            userAllergies.text = userData['allergies'];
+            userMedications.text = userData['medications'];
           });
         }
       } catch (e) {
@@ -75,22 +89,36 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Handle navigation logic here based on the selected index
-    switch (_selectedIndex) {
-      case 0:
-        // Navigate to Profile Page (already here)
-        break;
-      case 1:
-        // Navigate to another page
-        break;
-      case 2:
-        // Navigate to another page
-        break;
+  Future<void> _saveProfile() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .update({
+          'firstName': firstName.text,
+          'lastName': lastName.text,
+          'height': userHeight.text,
+          'weight': userWeight.text,
+          'age': userAge.text,
+          'sex': userSex.text,
+          'bloodType': userBloodType.text,
+          'address': userAddress.text,
+          'emergencyContactName': emergencyContactName.text,
+          'emergencyContactNumber': emergencyContactNumber.text,
+          'emergencyContactAddress': emergencyContactAddress.text,
+          'medicalConditions': userMedicalCond.text,
+          'allergies': userAllergies.text,
+          'medications': userMedications.text,
+        });
+        setState(() {
+          additionalInfoVisible = false;
+        });
+        print("Profile updated successfully");
+      } catch (e) {
+        print('Error updating profile: $e');
+      }
     }
   }
 
@@ -114,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         centerTitle: true,
-        elevation: 4,
+        elevation: 0,
       ),
       body: SafeArea(
         child: GestureDetector(
@@ -138,97 +166,380 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    'User Info',
-                    style: TextStyle(
-                      color: Color(0xFFD92B4B),
-                      fontSize: 20,
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // Implement action to edit the image
-                          print('Edit image');
-                        },
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
-                              child: Image.network(
-                                //update img acc to user profile
-                                'https://picsum.photos/seed/75/600',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                  Visibility(
+                    visible: !additionalInfoVisible,
+                    child: Column(
+                      children: [
+                        const Text(
+                          'User Info',
+                          style: TextStyle(
+                            color: Color(0xFFD92B4B),
+                            fontSize: 20,
                           ),
                         ),
-                      ),
-                      CustomMeasurementFormField(
-                        labelText: 'Height (cm)',
-                        controller: userHeight,
-                        keyboardType: TextInputType.number,
-                      ),
-                      CustomMeasurementFormField(
-                        labelText: 'Weight (kg)',
-                        controller: userWeight,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ],
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                // Implement action to edit the image
+                                print('Edit image');
+                              },
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Image.network(
+                                      //update img acc to user profile
+                                      'https://picsum.photos/seed/75/600',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            MeasurementHeightWeight(
+                              labelText: 'Height (cm)',
+                              controller: userHeight,
+                              keyboardType: TextInputType.number,
+                              enabled: false,
+                              readOnly: true,
+                            ),
+                            MeasurementHeightWeight(
+                              labelText: 'Weight (kg)',
+                              controller: userWeight,
+                              keyboardType: TextInputType.number,
+                              enabled: false,
+                              readOnly: true,
+                            ),
+                          ],
+                        ),
+                        CustomTextField(
+                          labelText: 'Firstname',
+                          controller: firstName,
+                          enabled: false,
+                          readOnly: true,
+                          fillColor: fillColorRed,
+                        ),
+                        CustomTextField(
+                          labelText: 'Lastname',
+                          controller: lastName,
+                          fillColor: fillColorRed,
+                          enabled: false,
+                          readOnly: true,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Age',
+                                controller: userAge,
+                                fillColor: fillColorRed,
+                                enabled: false,
+                                readOnly: true,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Sex',
+                                controller: userSex,
+                                fillColor: fillColorRed,
+                                enabled: false,
+                                readOnly: true,
+                              ),
+                            ),
+                            Expanded(
+                              child: CustomTextField(
+                                labelText: 'Blood Type',
+                                controller: userBloodType,
+                                fillColor: fillColorRed,
+                                enabled: false,
+                                readOnly: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "...",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                              color: Color(0xFFD92B4B)),
+                        ),
+                      ],
+                    ),
                   ),
-                  buildTextField('Firstname', firstName),
-                  buildTextField('Lastname', lastName),
-                  const SizedBox(
-                    height: 10,
-                  ),
+                  //
+                  //Visible display when dragged down
+                  //
+
                   Visibility(
                     visible: additionalInfoVisible,
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          const Text(
+                            'Edit User Info',
+                            style: TextStyle(
+                              color: Color(0xFFD92B4B),
+                              fontSize: 20,
+                            ),
+                          ),
                           Row(
+                            mainAxisSize: MainAxisSize.max,
                             children: [
-                              Expanded(
-                                child: buildTextField('Age', userAge,
-                                    keyboardType: TextInputType.number),
+                              GestureDetector(
+                                onTap: () {
+                                  // Implement action to edit the image
+                                  print('Edit image');
+                                },
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(100),
+                                      child: Image.network(
+                                        //update img acc to user profile
+                                        'https://picsum.photos/seed/75/600',
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              Expanded(
-                                child: buildTextField('Sex at Birth', userSex),
+                              MeasurementHeightWeight(
+                                labelText: 'Height (cm)',
+                                controller: userHeight,
+                                keyboardType: TextInputType.number,
+                                enabled: true,
+                                readOnly: false,
                               ),
-                              Expanded(
-                                child:
-                                    buildTextField('Blood Type', userBloodType),
+                              MeasurementHeightWeight(
+                                labelText: 'Weight (kg)',
+                                controller: userWeight,
+                                keyboardType: TextInputType.number,
+                                enabled: true,
+                                readOnly: false,
                               ),
                             ],
                           ),
-                          buildTextField('Address', userAddress),
+                          Text(
+                            "User Information",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                              color: Color(0xFFD92B4B),
+                            ),
+                          ),
+                          CustomTextField(
+                            labelText: 'Firstname',
+                            controller: firstName,
+                            enabled: true,
+                            readOnly: false,
+                            fillColor: fillColorRed,
+                          ),
+                          CustomTextField(
+                            labelText: 'Lastname',
+                            controller: lastName,
+                            fillColor: fillColorRed,
+                            enabled: true,
+                            readOnly: false,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextField(
+                                  labelText: 'Age',
+                                  controller: userAge,
+                                  fillColor: fillColorRed,
+                                  enabled: true,
+                                  readOnly: false,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: CustomTextField(
+                                  labelText: 'Sex',
+                                  controller: userSex,
+                                  fillColor: fillColorRed,
+                                  enabled: true,
+                                  readOnly: false,
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Blood Type',
+                                      style: TextStyle(
+                                        color: fillColorRed,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      value: selectedBloodType,
+                                      items: [
+                                        'A+',
+                                        'A-',
+                                        'B+',
+                                        'B-',
+                                        'AB+',
+                                        'AB-',
+                                        'O+',
+                                        'O-'
+                                      ].map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (newValue) {
+                                        setState(() {
+                                          selectedBloodType = newValue;
+                                        });
+                                      },
+                                      style: TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        floatingLabelBehavior:
+                                            FloatingLabelBehavior.never,
+                                        labelText: 'Blood Type',
+                                        labelStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                        filled: true,
+                                        fillColor: fillColorRed,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: fillColorRed,
+                                            width: 2,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: fillColorRed,
+                                            width: 2,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      dropdownColor: fillColorRed,
+                                      icon: Icon(Icons.arrow_drop_down,
+                                          color: Colors
+                                              .white), // Change icon color to white
+                                      iconEnabledColor: Colors
+                                          .white, // Change icon color to white
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          CustomTextField(
+                            labelText: 'Address',
+                            controller: userAddress,
+                            fillColor: fillColorRed,
+                            enabled: true,
+                            readOnly: false,
+                          ),
                           const Divider(
                             thickness: 10,
                           ),
-                          buildTextFieldEmergencyContact(
-                              'Emergency Contact Person', emergencyContactName),
-                          buildTextFieldEmergencyContact(
-                              'Emergency Contact Number',
-                              emergencyContactNumber,
-                              keyboardType: TextInputType.number),
-                          buildTextFieldEmergencyContact(
-                              'Emergency Contact Address',
-                              emergencyContactAddress),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "Emergency Contact Information",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                              color: Color(0xFFD92B4B),
+                            ),
+                          ),
+                          CustomTextField(
+                            labelText: 'Emergency Contact Person',
+                            controller: emergencyContactName,
+                            fillColor: fillColorGray,
+                            enabled: true,
+                            readOnly: false,
+                          ),
+                          CustomTextField(
+                            labelText: 'Emergency Contact Number',
+                            controller: emergencyContactNumber,
+                            fillColor: fillColorGray,
+                            enabled: true,
+                            readOnly: false,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                          ),
+                          CustomTextField(
+                            labelText: 'Emergency Contact Address',
+                            controller: emergencyContactAddress,
+                            fillColor: fillColorGray,
+                            enabled: true,
+                            readOnly: false,
+                          ),
                           const Divider(
                             height: 20,
                             thickness: 10,
                           ),
-                          buildTextField(
-                              'Medical Conditions:', userMedicalCond),
-                          buildTextField('Allergies:', userAllergies),
-                          buildTextField(
-                              'Current Medication:', userMedications),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "User Medical Conditions",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                              color: Color(0xFFD92B4B),
+                            ),
+                          ),
+                          CustomTextField(
+                            labelText: 'Medical Conditions:',
+                            controller: userMedicalCond,
+                            fillColor: fillColorRed,
+                            enabled: true,
+                            readOnly: false,
+                            minLines: 1,
+                            maxLines: 5,
+                          ),
+                          CustomTextField(
+                            labelText: 'Allergies:',
+                            controller: userAllergies,
+                            fillColor: fillColorRed,
+                            enabled: true,
+                            readOnly: false,
+                            minLines: 1,
+                            maxLines: 5,
+                          ),
+                          CustomTextField(
+                            labelText: 'Current Medication:',
+                            controller: userMedications,
+                            fillColor: fillColorRed,
+                            enabled: true,
+                            readOnly: false,
+                            minLines: 1,
+                            maxLines: 5,
+                          ),
                           const SizedBox(height: 10),
                           Container(
                             child: Align(
@@ -243,25 +554,64 @@ class _ProfilePageState extends State<ProfilePage> {
                                           Colors.white),
                                 ),
                                 onPressed: () {
-                                  // Save changes made by user
-                                  setState(() {
-                                    userHeight = userHeight;
-                                    userWeight = userWeight;
-                                    firstName = firstName;
-                                    lastName = lastName;
-                                    userAge = userAge;
-                                    userSex = userSex;
-                                    userBloodType = userBloodType;
-                                    userAddress = userAddress;
-                                    emergencyContactName = emergencyContactName;
-                                    emergencyContactNumber =
-                                        emergencyContactNumber;
-                                    emergencyContactAddress =
-                                        emergencyContactAddress;
-                                    userMedicalCond = userMedicalCond;
-                                    userAllergies = userAllergies;
-                                    userMedications = userMedications;
-                                  });
+                                  // Display the confirmation dialog along with the changes made by user
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Confirm Changes"),
+                                        content: SingleChildScrollView(
+                                          child: ListBody(
+                                            children: <Widget>[
+                                              Text(
+                                                  "Height: ${userHeight.text} cm"),
+                                              Text(
+                                                  "Weight: ${userWeight.text} kg"),
+                                              Text(
+                                                  "First Name: ${firstName.text}"),
+                                              Text(
+                                                  "Last Name: ${lastName.text}"),
+                                              Text("Age: ${userAge.text}"),
+                                              Text(
+                                                  "Sex at Birth: ${userSex.text}"),
+                                              Text(
+                                                  "Blood Type: ${userBloodType.text}"),
+                                              Text(
+                                                  "Address: ${userAddress.text}"),
+                                              Text(
+                                                  "Emergency Contact Name: ${emergencyContactName.text}"),
+                                              Text(
+                                                  "Emergency Contact Number: ${emergencyContactNumber.text}"),
+                                              Text(
+                                                  "Emergency Contact Address: ${emergencyContactAddress.text}"),
+                                              Text(
+                                                  "Medical Conditions: ${userMedicalCond.text}"),
+                                              Text(
+                                                  "Allergies: ${userAllergies.text}"),
+                                              Text(
+                                                  "Medications: ${userMedications.text}"),
+                                            ],
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: Text("Cancel"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: Text("Confirm"),
+                                            onPressed: () {
+                                              _saveProfile();
+
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
                                 },
                                 child: const Text('Save Profile'),
                               ),
@@ -275,187 +625,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.redAccent,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-
-  //for user personal info style
-  Widget buildTextField(String labelText, TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: SizedBox(
-        height: 30, // Added a fixed height
-        child: TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          autofocus: true,
-          obscureText: false,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            suffixIcon: const Icon(
-              Icons.edit_square,
-              size: 20,
-              color: Colors.white,
-            ),
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-            ),
-            filled: true,
-            fillColor: const Color(0xFFD92B4B),
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: Color(0xFFD92B4B),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: Color(0xFFD92B4B),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          validator: (value) {
-            // Validation logic here
-            return null;
-          },
-        ),
-      ),
-    );
-  }
-
-  // Custom widget for emergency contact style
-  Widget buildTextFieldEmergencyContact(
-      String labelText, TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: SizedBox(
-        height: 30,
-        child: TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          autofocus: true,
-          obscureText: false,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            suffixIcon: const Icon(
-              Icons.edit_square,
-              size: 20,
-              color: Colors.white,
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-            labelText: labelText,
-            labelStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-            ),
-            filled: true,
-            fillColor: const Color(0xFF666573),
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: Color(0xFF666573),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                color: Color(0xFF666573),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          validator: (value) {
-            // Validation logic here
-            return null;
-          },
-        ),
-      ),
-    );
-  }
-}
-
-//height and weight
-class CustomMeasurementFormField extends StatelessWidget {
-  final String labelText;
-  final TextEditingController controller;
-  final TextInputType keyboardType;
-
-  const CustomMeasurementFormField({
-    required this.labelText,
-    required this.controller,
-    required this.keyboardType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-        child: TextFormField(
-          controller: controller,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-          ],
-          keyboardType: keyboardType,
-          autofocus: true,
-          obscureText: false,
-          style: const TextStyle(color: Colors.black),
-          decoration: InputDecoration(
-            labelText: labelText,
-            filled: true,
-            fillColor: const Color(0xFFD9D9D9),
-            labelStyle: const TextStyle(
-              color: Colors.red,
-              fontSize: 15,
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: const BorderSide(
-                color: Colors.white,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: const BorderSide(
-                color: Colors.blue,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          validator: (value) {
-            // Validation logic here
-            return null;
-          },
         ),
       ),
     );
