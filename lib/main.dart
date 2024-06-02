@@ -39,6 +39,12 @@ class MyApp extends StatelessWidget {
           routes: {
             '/splash': (context) => const SplashVideoScreen(),
             '/user': (context) => const HomePage(),
+            '/profile': (context) => const ProfilePage(),
+            '/map': (context) => const MapScreen(),
+            '/settings': (context) => const SettingsPage(),
+            '/changeEmail': (context) => const ChangeEmailPage(),
+            '/changePassword': (context) => ChangePasswordPage(),
+            '/preferences': (context) => PreferencesPage(),
           },
         );
       },
