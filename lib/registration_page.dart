@@ -44,6 +44,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   bool _showSpinner = false;
   String _emailError = '';
   String _contactNumError = '';
+  String _passwordError = '';
+
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -108,6 +110,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       textFieldColor: AppColors.secondary,
                       onChanged: (_) => _checkFormFilled(),
                     ),
+                    if (_passwordError.isNotEmpty)
+                      Text(
+                        _passwordError,
+                        style: const TextStyle(color: Colors.yellow),
+                      ),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _reenterPasswordController,
@@ -186,10 +193,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
+  bool _validatePassword(String password) {
+    String pattern =
+        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+    RegExp regex = RegExp(pattern);
+    return regex.hasMatch(password);
+  }
+
   void _checkFormFilled() {
     setState(() {
       bool isContactNumberValid =
           RegExp(r'^09[0-9]{9}$').hasMatch(_contactNumberController.text);
+      bool isPasswordValid = _validatePassword(_passwordController.text);
       _registrationFilled = _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
@@ -198,15 +213,23 @@ class _RegistrationPageState extends State<RegistrationPage> {
           _passwordController.text.isNotEmpty &&
           _reenterPasswordController.text.isNotEmpty &&
           _contactNumberController.text.isNotEmpty &&
-          _passwordController.text == _reenterPasswordController.text;
+          _passwordController.text == _reenterPasswordController.text &&
+          isPasswordValid;
+
+      isContactNumberValid;
       _emailError = _emailController.text.isNotEmpty &&
               !_emailController.text.endsWith('@gmail.com')
           ? 'Email must end with @gmail.com'
           : '';
+
       _contactNumError =
           _contactNumberController.text.isNotEmpty && !isContactNumberValid
               ? 'Contact number must start with 09 and be exactly 11 digits'
               : '';
+
+      _passwordError = !_validatePassword(_passwordController.text)
+          ? 'Password must contain uppercase, lowercase, at least 2 digits, and 1 special character'
+          : '';
     });
   }
 
