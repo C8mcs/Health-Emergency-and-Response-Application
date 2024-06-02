@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final Color hintTextColor;
   final Color textFieldColor;
   final Color textColor;
+  final bool obscureText;
   final ValueChanged<String>? onChanged;
-  final bool? obscureText;
+  final Widget? suffixIcon;
 
   const CustomTextField({
     Key? key,
@@ -16,15 +17,29 @@ class CustomTextField extends StatelessWidget {
     required this.hintTextColor,
     required this.textFieldColor,
     required this.textColor,
-    this.obscureText,
+    this.obscureText = false,
     this.onChanged,
+    this.suffixIcon,
   }) : super(key: key);
+
+  @override
+  _CustomTextFieldState createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  bool _obscureText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: textFieldColor,
+        color: widget.textFieldColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -34,18 +49,45 @@ class CustomTextField extends StatelessWidget {
           ),
         ],
       ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText ?? true,
-        style: TextStyle(color: textColor),
+      child: TextField(
+        controller: widget.controller,
+        obscureText: widget.obscureText && _obscureText,
+        style: TextStyle(color: widget.textColor),
+        onChanged: widget.onChanged,
         decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(color: hintTextColor),
-          border: InputBorder.none,
+          hintText: widget.hintText,
+          hintStyle: TextStyle(color: widget.hintTextColor),
+          filled: true,
+          fillColor: widget.textFieldColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          suffixIcon: widget.obscureText
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                  child: widget.suffixIcon ??
+                      Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: widget.hintTextColor,
+                      ),
+                )
+              : null,
         ),
-        onChanged: onChanged,
       ),
     );
   }

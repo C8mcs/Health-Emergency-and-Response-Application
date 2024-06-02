@@ -115,6 +115,10 @@ class _LoginPageState extends State<LoginPage> {
                           hintTextColor: AppColors.tertiary,
                           textFieldColor: AppColors.secondary,
                           textColor: AppColors.tertiaryVariant,
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.person),
+                            onPressed: () {},
+                          ),
                           obscureText: false,
                           onChanged: (value) {
                             email = value;
