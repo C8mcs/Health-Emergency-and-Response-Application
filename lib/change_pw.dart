@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+import 'app_constants.dart';
+import 'theme_notifier.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -58,7 +60,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         });
 
         print('Password updated successfully.');
-      } catch (e) {}
+      } catch (e) {
+        print('Error updating password: $e');
+      }
     }
   }
 
@@ -76,7 +80,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: themeData.colorScheme.secondary,
       appBar: AppBar(
-        title: Text('Change Username'),
+        backgroundColor: themeData.colorScheme.primary,
+        title: Text(
+          'Change Password',
+          style: AppTextStyles.headline.copyWith(
+            color:
+                themeData.colorScheme.onPrimary, // Use onPrimary color for text
+            fontSize: 20,
+          ),
+        ), // Use theme app bar color
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -90,12 +102,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               Text(
                 'New Password',
-                style: AppTextStyles.headline.copyWith(
-                  color: themeData
-                      .colorScheme.onPrimary, // Use onPrimary color for text
-                  fontSize: 20,
-                ),
+                style: themeData.textTheme.bodyMedium,
               ),
+              const SizedBox(height: 10),
               const Text(
                 'You will be changing your password.\nType your new password on the text field below.\nBe Secure.',
               ),
@@ -168,7 +177,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                     _savedPassword = _passwordController.text;
                                   });
                                   print('Saved Password: $_savedPassword');
-                                  // Here you can add the logic to save the new password
+                                  _savePassword(); // Save the new password
                                   Navigator.of(context)
                                       .pop(); // Close the dialog
                                 },
@@ -190,8 +199,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 10, right: 10.0, top: 5, bottom: 5),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                     child: Text(
                       'Save',
                       textAlign: TextAlign.left,
