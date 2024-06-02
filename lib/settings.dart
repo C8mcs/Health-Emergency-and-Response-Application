@@ -137,13 +137,13 @@ class SettingsMenuItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
-        leading:
-            Icon(icon, color: themeData.iconTheme.color), // Use theme color
+        leading: Icon(icon,
+            color: themeData.secondaryHeaderColor), // Use theme color
         title: Text(
           text,
           style: TextStyle(
             fontSize: 18,
-            color: themeData.textTheme.bodyLarge?.color, // Use theme color
+            color: themeData.secondaryHeaderColor, // Use theme color
           ),
         ),
         trailing: Icon(Icons.arrow_forward_ios,
