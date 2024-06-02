@@ -1,25 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:health_emergency_response_app/logout.dart';
+
 import 'reusables/custom_widget_profile_page.dart';
-
-void main() {
-  runApp(const ProfileApp());
-}
-
-class ProfileApp extends StatelessWidget {
-  const ProfileApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ProfilePage(),
-    );
-  }
-}
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -153,12 +137,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     visible: !additionalInfoVisible,
                     child: Column(
                       children: [
-                        SizedBox(height: 30,),
+                        SizedBox(
+                          height: 30,
+                        ),
                         const Text(
                           'User Info',
                           style: TextStyle(
                             color: Color(0xFFD92B4B),
-                            fontSize: 20, fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         Row(

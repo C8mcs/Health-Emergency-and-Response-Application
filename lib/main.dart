@@ -6,9 +6,15 @@ import 'package:health_emergency_response_app/homepage.dart';
 import 'package:health_emergency_response_app/splash_video_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'change_email.dart';
+import 'change_pw.dart';
 import 'firebase_options.dart';
+import 'map_page.dart';
 import 'models/user.dart';
+import 'profile_page.dart';
+import 'settings.dart';
 import 'theme_notifier.dart';
+import 'user_pref.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
