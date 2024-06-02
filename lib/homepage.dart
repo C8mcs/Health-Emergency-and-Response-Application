@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
+import 'app_constants.dart';
 import 'map_page.dart';
-import 'preferences_page.dart';
 import 'profile_page.dart';
-
-
+import 'settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     ProfilePage(),
     MapScreen(),
-    PreferencesScreen(),
+    SettingsPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.redAccent,
+        selectedItemColor: AppColors.primary,
         onTap: _onItemTapped,
       ),
     );
