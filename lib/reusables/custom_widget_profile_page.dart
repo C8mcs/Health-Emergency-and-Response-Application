@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextField extends StatelessWidget {
   final String labelText;
@@ -33,9 +34,9 @@ class CustomTextField extends StatelessWidget {
         children: [
           Text(
             labelText,
-            style: TextStyle(
-              color: fillColor,
-              fontSize: 15,
+            style: GoogleFonts.montserrat(
+              textStyle: TextStyle(
+                  color: fillColor, fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
           TextFormField(
@@ -46,13 +47,15 @@ class CustomTextField extends StatelessWidget {
             inputFormatters: inputFormatters,
             enabled: enabled,
             readOnly: readOnly,
-            style: TextStyle(color: Colors.white),
+            style: GoogleFonts.montserrat(
+              textStyle:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
             decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
               labelText: labelText,
-              labelStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
+              labelStyle: GoogleFonts.montserrat(
+                textStyle: TextStyle(color: Colors.white, fontSize: 15),
               ),
               filled: true,
               fillColor: fillColor,
@@ -108,24 +111,27 @@ class MeasurementHeightWeight extends StatelessWidget {
           keyboardType: keyboardType,
           autofocus: true,
           obscureText: false,
-          style: const TextStyle(color: Colors.black),
+          style: GoogleFonts.montserrat(
+            textStyle:
+                TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
           decoration: InputDecoration(
             labelText: labelText,
             filled: true,
             fillColor: const Color(0xFFD9D9D9),
-            labelStyle: const TextStyle(
-              color: Colors.red,
-              fontSize: 15,
+            labelStyle: GoogleFonts.montserrat(
+              textStyle: TextStyle(
+                  color: Colors.red, fontSize: 15, fontWeight: FontWeight.w500),
             ),
             enabledBorder: UnderlineInputBorder(
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: Colors.white,
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: UnderlineInputBorder(
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: Colors.blue,
                 width: 2,
               ),

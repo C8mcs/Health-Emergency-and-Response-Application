@@ -1,9 +1,26 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'reusables/custom_widget_profile_page.dart';
+import 'app_constants.dart';
+
+class ProfileApp extends StatelessWidget {
+  const ProfileApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: ProfilePage(),
+    );
+  }
+}
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -35,6 +52,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // Initial visibility of additional information
   bool additionalInfoVisible = false;
   String? selectedBloodType;
+  Uint8List? pickedImage;
+  String? contactNumber;
 
   @override
   void initState() {
@@ -66,11 +85,50 @@ class _ProfilePageState extends State<ProfilePage> {
             userMedicalCond.text = userData['medicalConditions'];
             userAllergies.text = userData['allergies'];
             userMedications.text = userData['medications'];
+            contactNumber = userData['contactNumber'];
           });
         }
       } catch (e) {
         print('Error fetching user data: $e');
       }
+    }
+  }
+
+  Future<void> onProfileChange() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    setState(() {
+      pickedImage = File(image.path).readAsBytesSync();
+    });
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) return;
+
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final fileName = '${firebaseUser.uid}/profile_picture.jpg';
+      final uploadTask = storageRef.child(fileName).putFile(File(image.path));
+
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        print(
+            'Upload progress: ${snapshot.bytesTransferred} / ${snapshot.totalBytes}');
+      });
+
+      await uploadTask;
+
+      final String downloadURL =
+          await storageRef.child(fileName).getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .update({'profilePicture': downloadURL});
+
+      print('Profile picture uploaded successfully');
+    } catch (e) {
+      print('Error uploading profile picture: $e');
     }
   }
 
@@ -127,167 +185,234 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Container(
             decoration: const BoxDecoration(
               color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(10),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Visibility(
                     visible: !additionalInfoVisible,
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: 30,
-                        ),
-                        const Text(
-                          'User Info',
-                          style: TextStyle(
-                            color: Color(0xFFD92B4B),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
+                        SizedBox(height: 100),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Implement action to edit the image
-                                print('Edit image');
-                              },
+                            Container(
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFD92B4B),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              height: 270,
+                            ),
+                            Positioned(
+                              top: -50,
                               child: Container(
                                 width: 120,
                                 height: 120,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Image.network(
-                                      //update img acc to user profile
-                                      'https://picsum.photos/seed/75/600',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: Colors.grey, width: 3),
+                                    shape: BoxShape.circle,
+                                    image: pickedImage != null
+                                        ? DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: Image.memory(
+                                              pickedImage!,
+                                              fit: BoxFit.cover,
+                                            ).image,
+                                          )
+                                        : null),
+                                child: Icon(
+                                  Icons.person_rounded,
+                                  color: Colors.black38,
+                                  size: 35,
                                 ),
                               ),
                             ),
-                            MeasurementHeightWeight(
-                              labelText: 'Height (cm)',
-                              controller: userHeight,
-                              keyboardType: TextInputType.number,
-                              enabled: false,
-                              readOnly: true,
-                            ),
-                            MeasurementHeightWeight(
-                              labelText: 'Weight (kg)',
-                              controller: userWeight,
-                              keyboardType: TextInputType.number,
-                              enabled: false,
-                              readOnly: true,
-                            ),
-                          ],
-                        ),
-                        CustomTextField(
-                          labelText: 'Firstname',
-                          controller: firstName,
-                          enabled: false,
-                          readOnly: true,
-                          fillColor: fillColorRed,
-                        ),
-                        CustomTextField(
-                          labelText: 'Lastname',
-                          controller: lastName,
-                          fillColor: fillColorRed,
-                          enabled: false,
-                          readOnly: true,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                labelText: 'Age',
-                                controller: userAge,
-                                fillColor: fillColorRed,
-                                enabled: false,
-                                readOnly: true,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: CustomTextField(
-                                labelText: 'Sex',
-                                controller: userSex,
-                                fillColor: fillColorRed,
-                                enabled: false,
-                                readOnly: true,
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                            Column(
+                              children: [
+                                SizedBox(height: 80),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Blood Type',
-                                      style: TextStyle(
-                                        color: fillColorRed,
-                                        fontSize: 15,
+                                      "${firstName.text} ${lastName.text}",
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                                    TextFormField(
-                                      controller: TextEditingController(
-                                          text: selectedBloodType ?? ''),
-                                      enabled: false,
-                                      readOnly: true,
-                                      style: TextStyle(color: Colors.white),
-                                      decoration: InputDecoration(
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        labelText: 'Blood Type',
-                                        labelStyle: TextStyle(
+                                    Text(
+                                      " (${userAge.text})",
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 15,
-                                        ),
-                                        filled: true,
-                                        fillColor: fillColorRed,
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: fillColorRed,
-                                            width: 2,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: fillColorRed,
-                                            width: 2,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          fontSize: 16,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      color: Colors.white,
+                                      size: 24.0,
+                                    ),
+                                    Text(
+                                      " ${userAddress.text}",
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  "Contact No: ${contactNumber}",
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                                SizedBox(height: 30),
+                                Divider(
+                                  height: 2,
+                                  color: Colors.white,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Height (cm)",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "${userHeight.text}",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 50,
+                                      child: VerticalDivider(
+                                        thickness: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Weight (kg)",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "${userWeight.text}",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 50,
+                                      child: VerticalDivider(
+                                        thickness: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "Blood Type",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "${selectedBloodType ?? ''}",
+                                            style: GoogleFonts.montserrat(
+                                              textStyle: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
                             ),
                           ],
                         ),
+                        SizedBox(height: 10),
                         Text(
                           "...",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 30,
+                              fontFamily: 'Montserrat',
                               color: Color(0xFFD92B4B)),
                         ),
-                        SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -301,33 +426,40 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text(
+                          SizedBox(height: 20),
+                          Text(
                             'Edit User Info',
-                            style: TextStyle(
-                              color: Color(0xFFD92B4B),
-                              fontSize: 20,
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                  color: Color(0xFFD92B4B),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  // Implement action to edit the image
-                                  print('Edit image');
-                                },
-                                child: Container(
-                                  width: 120,
-                                  height: 120,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(100),
-                                      child: Image.network(
-                                        //update img acc to user profile
-                                        'https://picsum.photos/seed/75/600',
-                                        fit: BoxFit.cover,
-                                      ),
+                              InkWell(
+                                onTap: onProfileChange, // bind the method here
+                                child: GestureDetector(
+                                  child: Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      shape: BoxShape.circle,
+                                      image: pickedImage != null
+                                          ? DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: MemoryImage(
+                                                  pickedImage!), // Use MemoryImage to directly load bytes
+                                            )
+                                          : null,
+                                    ),
+                                    child: Icon(
+                                      Icons.person_rounded,
+                                      color: Colors.black38,
+                                      size: 35,
                                     ),
                                   ),
                                 ),
@@ -350,10 +482,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           Text(
                             "User Information",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              color: Color(0xFFD92B4B),
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                  color: Color(0xFFD92B4B),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500),
                             ),
                           ),
                           CustomTextField(
@@ -403,6 +536,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       style: TextStyle(
                                         color: fillColorRed,
                                         fontSize: 15,
+                                        fontFamily: 'Montserrat',
                                       ),
                                     ),
                                     DropdownButtonFormField<String>(
@@ -427,14 +561,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                           selectedBloodType = newValue;
                                         });
                                       },
-                                      style: TextStyle(color: Colors.white),
+                                      style: GoogleFonts.montserrat(
+                                          textStyle:
+                                              TextStyle(color: Colors.white),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600),
                                       decoration: InputDecoration(
                                         floatingLabelBehavior:
                                             FloatingLabelBehavior.never,
                                         labelText: 'Blood Type',
-                                        labelStyle: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
+                                        labelStyle: GoogleFonts.montserrat(
+                                          textStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                         filled: true,
                                         fillColor: fillColorRed,
@@ -474,19 +614,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabled: true,
                             readOnly: false,
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 15),
                           const Divider(
-                            thickness: 10,
+                            thickness: 5,
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 15,
                           ),
                           Text(
                             "Emergency Contact Information",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              color: Color(0xFFD92B4B),
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                  color: Color(0xFFD92B4B),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500),
                             ),
                           ),
                           CustomTextField(
@@ -514,20 +655,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabled: true,
                             readOnly: false,
                           ),
-                          SizedBox(height: 10),
-                          const Divider(
-                            height: 20,
-                            thickness: 10,
-                          ),
+                          SizedBox(height: 15),
+                          const Divider(height: 20, thickness: 5),
                           const SizedBox(
-                            height: 10,
+                            height: 15,
                           ),
                           Text(
                             "User Medical Conditions",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              color: Color(0xFFD92B4B),
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                  color: Color(0xFFD92B4B),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500),
                             ),
                           ),
                           CustomTextField(
@@ -630,7 +769,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                     },
                                   );
                                 },
-                                child: const Text('Save Profile'),
+                                child: Text(
+                                  'Save Profile',
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
