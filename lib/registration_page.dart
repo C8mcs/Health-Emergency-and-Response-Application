@@ -6,6 +6,7 @@ import 'package:health_emergency_response_app/app_constants.dart';
 import 'login_page.dart';
 import 'models/user.dart';
 import 'reusables/form_constants.dart';
+import 'reusables/modal_constant.dart';
 
 class RegistrationPage extends StatefulWidget {
   final VoidCallback? onRegistrationCompleted;
@@ -260,12 +261,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
             FirebaseFirestore.instance.collection('users').doc(user.uid);
         await userRef.set(user.toMap());
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration Successful!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 5),
-          ),
+        showModal(
+          context,
+          'Registration Successful!',
         );
 
         if (widget.onRegistrationCompleted != null) {
@@ -280,20 +278,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
       });
 
       if (e is FirebaseAuthException) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(getErrorMessage(e.code)),
-            backgroundColor: AppColors.secondary,
-            duration: const Duration(seconds: 5),
-          ),
+        showModal(
+          context,
+          getErrorMessage(e.code),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration failed. Please try again.'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 5),
-          ),
+        showModal(
+          context,
+          'Registration failed. Please try again.',
         );
       }
     }
