@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'app_constants.dart';
-import 'theme_notifier.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -13,12 +11,20 @@ class ChangePasswordPage extends StatefulWidget {
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _oldPasswordController = TextEditingController();
   String _savedPassword = '';
 
   @override
   void initState() {
     super.initState();
     _fetch();
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _oldPasswordController.dispose();
+    super.dispose();
   }
 
   _fetch() async {
@@ -50,9 +56,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             .update({
           'password': _passwordController.text,
         });
+
         print('Password updated successfully.');
       } catch (e) {}
     }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -63,14 +76,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: themeData.colorScheme.secondary,
       appBar: AppBar(
-        title: Text(
-          'Change Username',
-          style: AppTextStyles.headline.copyWith(
-              color: themeData
-                  .colorScheme.onPrimary, // Use onPrimary color for text
-              fontSize: 20),
-        ),
-        backgroundColor: themeData.colorScheme.primary,
+        title: Text('Change Username'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -97,13 +103,19 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 height: 30,
               ),
               Container(
-                color: themeData.cardColor, // Set the background color here
+                color: Colors.grey[200], // Set the background color here
                 child: TextField(
                   controller:
                       _passwordController, // Use the controller to get the entered password
                   decoration: InputDecoration(
                     labelText: 'New Password',
+                    labelStyle: TextStyle(
+                        color: Colors.grey), // Color of the label text
+                    hintText: 'Enter your new password',
+                    hintStyle:
+                        TextStyle(color: Colors.grey), // Color of the hint text
                     border: OutlineInputBorder(
+                      // Border around the text field
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
@@ -114,9 +126,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Check if the length of the entered password is less than or equal to 5
                     if (_passwordController.text.length <= 5) {
-                      // Show an alert dialog to inform the user that the password is too short
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -137,7 +147,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         },
                       );
                     } else {
-                      // Show an alert dialog before saving the new password
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -180,7 +189,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       side: const BorderSide(color: Colors.white, width: 2.0),
                     ),
                   ),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.only(
                         left: 10, right: 10.0, top: 5, bottom: 5),
                     child: Text(
