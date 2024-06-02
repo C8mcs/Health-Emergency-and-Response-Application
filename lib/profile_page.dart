@@ -45,7 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController userMedicalCond = TextEditingController();
   TextEditingController userAllergies = TextEditingController();
   TextEditingController userMedications = TextEditingController();
-  late String contactNumber;
 
   final Color fillColorRed = Color(0xFFD92B4B);
   final Color fillColorGray = Color(0xFF666573);
@@ -54,6 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool additionalInfoVisible = false;
   String? selectedBloodType;
   Uint8List? pickedImage;
+  String? contactNumber;
 
   @override
   void initState() {
@@ -209,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 color: Color(0xFFD92B4B),
                                 borderRadius: BorderRadius.circular(15),
                               ),
-                              height: 200,
+                              height: 270,
                             ),
                             Positioned(
                               top: -50,
@@ -264,17 +264,38 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ],
                                 ),
-                                Text(
-                                  " ${userAddress.text}",
-                                  style: GoogleFonts.montserrat(
-                                    textStyle: TextStyle(
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
                                       color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
+                                      size: 24.0,
                                     ),
-                                  ),
+                                    Text(
+                                      " ${userAddress.text}",
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(height: 20),
+                                Text(
+                                  "Contact No: ${contactNumber}",
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                                SizedBox(height: 30),
                                 Divider(
                                   height: 2,
                                   color: Colors.white,
