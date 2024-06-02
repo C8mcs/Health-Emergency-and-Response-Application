@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../app_constants.dart';
-
-void showModal(BuildContext context, String message) {
+void showModal(BuildContext context, String title,
+    {String? message, Widget? content}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(
-          'Notification',
-          style: AppTextStyles.subheading,
-        ),
-        content: Text(message),
+        title: Text(title),
+        content: content ?? Text(message ?? ''),
         actions: <Widget>[
           TextButton(
+            child: Text('OK'),
             onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop();
             },
-            child: const Text('OK'),
           ),
         ],
       );

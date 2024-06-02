@@ -86,8 +86,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const Flexible(
                             child: Logo(
-                          width: 400,
-                          height: 400,
+                          logoWidth: 400,
+                          logoHeight: 400,
                         )),
                         const SizedBox(height: 10),
                         Text(

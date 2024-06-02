@@ -5,14 +5,14 @@ class AppColors {
   // Light theme colors
   static const Color lightPrimary = Color(0xFFD92B4B);
   static const Color lightPrimaryVariant = Color(0xFFF24171);
-  static const Color lightSecondary = Color(0xFFF2F2F2);
+  static const Color lightSecondary = Color(0xFF1E1E1E);
   static const Color lightTertiary = Color(0xFF656573);
   static const Color lightTertiaryVariant = Color(0xFF363740);
 
   // Dark theme colors
   static const Color darkPrimary = Color(0xFF1E1E1E);
   static const Color darkPrimaryVariant = Color(0xFFF24171);
-  static const Color darkSecondary = Color(0xFF2E2E2E);
+  static const Color darkSecondary = Color(0xFFF2F2F2);
   static const Color darkTertiary = Color(0xFF757575);
   static const Color darkTertiaryVariant = Color(0xFF424242);
 }
@@ -35,6 +35,20 @@ class AppTextStyles {
     ],
   );
 
+  static final TextStyle lightBodyTexts = GoogleFonts.getFont(
+    _fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 10,
+    color: AppColors.darkSecondary,
+    shadows: [
+      Shadow(
+        offset: const Offset(0, 2),
+        blurRadius: 3.0,
+        color: Colors.black.withOpacity(0.5),
+      ),
+    ],
+  );
+
   // Define other light theme text styles similarly
 
   // Dark theme text styles
@@ -42,6 +56,20 @@ class AppTextStyles {
     _fontFamily,
     fontWeight: FontWeight.bold,
     fontSize: 80,
+    color: AppColors.darkPrimary,
+    shadows: [
+      Shadow(
+        offset: const Offset(0, 2),
+        blurRadius: 3.0,
+        color: Colors.black.withOpacity(0.5),
+      ),
+    ],
+  );
+
+  static final TextStyle darkBodyTexts = GoogleFonts.getFont(
+    _fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 10,
     color: AppColors.darkPrimary,
     shadows: [
       Shadow(

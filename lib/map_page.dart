@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,13 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:provider/provider.dart';
+
+import 'app_constants.dart';
 import 'models/signal.dart';
+import 'reusables/logo.dart';
+import 'reusables/modal_constant.dart';
+import 'theme_notifier.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -16,6 +23,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  bool isUserInfoVisible = true;
   bool isCalling = false;
   bool isResponder = false;
   bool isResponding = false;
@@ -54,78 +62,37 @@ class _MapScreenState extends State<MapScreen> {
     CircleMarker userLocationCircle = CircleMarker(
       point: LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
       radius: 5,
-      color: Colors.blue, // Adjust color and transparency
+      color: Colors.blue,
       borderColor: Colors.black,
       borderStrokeWidth: 1,
     );
     _userLocationCircles.add(userLocationCircle);
 
-    void _clearMarkers(_mapMarkers) {
-      _mapMarkers.clear();
-    }
-
-    void _createMarkers(querySnapshot) {
-      final markers = <Marker>[];
-      for (var doc in querySnapshot.docs) {
-        final data = doc.data();
-        final double latitude = data['victimLocation'].latitude;
-        final double longitude = data['victimLocation'].longitude;
-        final double distance = calculateDistance(
-            LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
-            LatLng(latitude, longitude));
-        final color = getColorBasedOnDistance(distance);
-        final String documentID = doc.id;
-        markers.add(
-          Marker(
-            width: 100,
-            height: 100,
-            point: LatLng(latitude, longitude),
-            child: IconButton(
-              iconSize: 40,
-              icon: Icon(Icons.person_pin_circle),
-              color: Colors.red,
-              onPressed: () {
-                if (isResponder) {
-                  _mapController.move(LatLng(latitude, longitude), 20);
-                  setState(() {
-                    responderID = currentUserID!;
-                    showRespondButton = true;
-                    victimID = documentID;
-                    routeToDistressed.clear();
-                    routeToDistressed.add(
-                        Polyline(
-                          color: Colors.black,
-                          isDotted: true,
-                          strokeWidth: 5,
-                          points: [LatLng(_currentLocation.latitude!, _currentLocation.longitude!), LatLng(latitude, longitude)],
-                        )
-                    );
-                  });
-                }
-              },
-            ),
-          ),
-        );
-      }
-      setState(() {
-        _clearMarkers(_mapMarkers);
-        _mapMarkers = markers;
-      });
-    }
     _location.onLocationChanged.listen((LocationData locationData) {
       setState(() {
         _currentLocation = locationData;
         if (_distressCallRef != null) {
-          final victimLocation = GeoPoint(locationData.latitude!, locationData.longitude!);
-          _distressCallRef!.update({'victimLocation': victimLocation});
+          final victimLocation =
+              GeoPoint(locationData.latitude!, locationData.longitude!);
+          try {
+            _distressCallRef!.update({'victimLocation': victimLocation});
+          } catch (e) {
+            showModal(
+              context,
+              'Error',
+              message:
+                  'Failed to update victim location. Please try again later.',
+            );
+          }
           if (!isCalling) {
             _userLocationCircles.clear();
-            LatLng userLocation = LatLng(_currentLocation.latitude!, _currentLocation.longitude!);
+            LatLng userLocation =
+                LatLng(_currentLocation.latitude!, _currentLocation.longitude!);
             _userLocationCircles.add(
               CircleMarker(
                 point: userLocation,
-                radius: 5, // Adjust radius as needed (in meters)
-                color: Colors.blue, // Adjust color and transparency
+                radius: 5,
+                color: Colors.blue,
                 borderColor: Colors.black,
                 borderStrokeWidth: 1,
               ),
@@ -139,7 +106,7 @@ class _MapScreenState extends State<MapScreen> {
         .collection('distressCalls')
         .snapshots()
         .listen((querySnapshot) {
-      _clearMarkers(_mapMarkers);
+      _clearMarkers();
       _createMarkers(querySnapshot);
     });
   }
@@ -150,94 +117,338 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
+  void _clearMarkers() {
+    _mapMarkers.clear();
+  }
+
+  void _createMarkers(QuerySnapshot querySnapshot) {
+    try {
+      final markers = <Marker>[];
+      for (var doc in querySnapshot.docs) {
+        try {
+          final data = doc.data() as Map<String, dynamic>;
+          final double latitude = data['victimLocation'].latitude;
+          final double longitude = data['victimLocation'].longitude;
+          final String? emergencyType = data['emergencyType'];
+          final String? name = data['name'];
+          final String? contactNumber = data['contactNumber'];
+          final String? emergencyContactNumber = data['emergencyContactNumber'];
+          final double distance = calculateDistance(
+            LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
+            LatLng(latitude, longitude),
+          );
+          final String documentID = doc.id;
+          markers.add(
+            Marker(
+              width: 100,
+              height: 100,
+              point: LatLng(latitude, longitude),
+              child: GestureDetector(
+                onTap: () {
+                  if (isResponder) {
+                    _mapController.move(LatLng(latitude, longitude), 20);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Emergency Details'),
+                          content: SingleChildScrollView(
+                            child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Emergency Type: $emergencyType',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Name: $name'),
+                                  const SizedBox(height: 4),
+                                  Text('Contact Number: $contactNumber'),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                      'Emergency Contact: $emergencyContactNumber'),
+                                ],
+                              ),
+                            ),
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  responderID =
+                                      FirebaseAuth.instance.currentUser!.uid;
+                                  showRespondButton = true;
+                                  victimID = documentID;
+                                  routeToDistressed.clear();
+                                  routeToDistressed.add(
+                                    Polyline(
+                                      color: Colors.black,
+                                      isDotted: true,
+                                      strokeWidth: 5,
+                                      points: [
+                                        LatLng(_currentLocation.latitude!,
+                                            _currentLocation.longitude!),
+                                        LatLng(latitude, longitude),
+                                      ],
+                                    ),
+                                  );
+                                });
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .primaryColor, // Button color based on the current theme
+                              ),
+                              child: const Text(
+                                'Respond',
+                                style: TextStyle(
+                                  color: Colors.white, // Set the text color
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                'Close',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSecondary, // Set text color based on the theme
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person_pin_circle, color: Colors.red),
+                      Text(
+                        emergencyType ?? 'Unknown',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        } catch (e) {
+          print('Error processing document ${doc.id}: $e');
+          markers.add(
+            Marker(
+              width: 100,
+              height: 100,
+              point: const LatLng(0, 0),
+              child: Container(
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: Colors.red),
+                    Text(
+                      'Error',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      }
+      setState(() {
+        _clearMarkers();
+        _mapMarkers = markers;
+      });
+    } catch (e) {
+      showModal(
+        context,
+        'Error',
+        message: 'Failed to load distress markers. Please try again later.',
+      );
+    }
+  }
+
   double calculateDistance(LatLng point1, LatLng point2) {
     final double distanceInMeters = Geolocator.distanceBetween(
         point1.latitude, point1.longitude, point2.latitude, point2.longitude);
     return distanceInMeters;
   }
 
-  Color getColorBasedOnDistance(double distance) {
-    int opacity;
-    if (distance < 200) {
-      opacity = 250;
-    }
-    else if (distance < 400) {
-      opacity = 150;
-    }
-    else if (distance < 600){
-      opacity = 50;
-    }
-    else {
-      opacity = 0;
-    }
-    return Color.fromARGB(opacity, 255, 0, 0);
-  }
-
   void _centerOnMarker() {
     _mapController.move(
-        LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
-        _zoomLevel);
+      LatLng(_currentLocation.latitude!, _currentLocation.longitude!),
+      _zoomLevel,
+    );
   }
 
-  void _sendDistressSignal(user) async{
-    Location location = new Location();
-    LocationData locationData = await location.getLocation();
-    GeoPoint victimLocation = GeoPoint(
+  void _sendDistressSignal(User? user) async {
+    try {
+      Location location = Location();
+      LocationData locationData = await location.getLocation();
+      GeoPoint victimLocation = GeoPoint(
         locationData.latitude ?? 0.0,
-        locationData.longitude ?? 0.0);
-    Signal helpSignal = Signal(emergencyType: "SOS",
+        locationData.longitude ?? 0.0,
+      );
+
+      String emergencyType = await _showEmergencyTypeDialog();
+
+      // You can retrieve the user information here
+      String name = user?.displayName ?? '';
+      String contactNumber = user?.phoneNumber ?? '';
+      // Get the emergency contact number from wherever it's stored
+      String emergencyContactNumber = ''; // TODO: Get emergency contact number
+
+      Signal helpSignal = Signal(
+        emergencyType: emergencyType,
         dateCreated: DateTime.now().toString(),
-        victimLocation: victimLocation);
-    await FirebaseFirestore.instance
-        .collection('distressCalls')
-        .doc(user?.uid)
-        .set(helpSignal.toMap());
+        victimLocation: victimLocation,
+        name: name,
+        contactNumber: contactNumber,
+        emergencyContactNumber: emergencyContactNumber,
+      );
+      await FirebaseFirestore.instance
+          .collection('distressCalls')
+          .doc(user?.uid)
+          .set(helpSignal.toMap());
+    } catch (e) {
+      showModal(
+        context,
+        'Error',
+        message: 'Failed to send distress signal. Please try again later.',
+      );
+    }
   }
 
-  void _deleteSignal(user) async{
-    await FirebaseFirestore.instance
-        .collection('distressCalls')
-        .doc(user?.uid)
-        .delete();
+  Future<String> _showEmergencyTypeDialog() async {
+    String selectedEmergencyType = '';
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Emergency Type'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Violence'),
+                onTap: () {
+                  selectedEmergencyType = 'Violence';
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Fire'),
+                onTap: () {
+                  selectedEmergencyType = 'Fire';
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Health'),
+                onTap: () {
+                  selectedEmergencyType = 'Health';
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Disaster'),
+                onTap: () {
+                  selectedEmergencyType = 'Disaster';
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    return selectedEmergencyType;
+  }
+
+  void _deleteSignal(user) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('distressCalls')
+          .doc(user?.uid)
+          .delete();
+    } catch (e) {
+      showModal(
+        context,
+        'Error',
+        message: 'Failed to delete distress signal. Please try again later.',
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
     return Scaffold(
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (!isResponder)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton.extended(
-                onPressed: () async {
-                  if (!isCalling) {
-                    _sendDistressSignal(FirebaseAuth.instance.currentUser);
-                    setState(() {
-                      isCalling = true;
-                      _userLocationCircles.clear();
-                    });
-                  }
-
-                  else {
-                    _deleteSignal(FirebaseAuth.instance.currentUser);
-                    setState(() {
-                      isCalling = false;
-                    });
-                  }
-                },
-                label: isCalling ? const Text('Cancel') : const Text('SOS'),
-                icon: const Icon(Icons.check),
+      appBar: AppBar(
+        backgroundColor: themeData.colorScheme.primary,
+        leading: IconButton(
+          icon: Icon(Icons.my_location),
+          onPressed: _centerOnMarker,
+        ),
+        actions: [
+          Container(
+            width: 250,
+            child: SwitchListTile(
+              activeColor: themeData.colorScheme.inversePrimary,
+              inactiveTrackColor: themeData.colorScheme.onPrimary,
+              title: Padding(
+                padding: const EdgeInsets.only(
+                    right: 16.0), // Adjust the right padding as needed
+                child: Text(
+                  switchText,
+                  style: AppTextStyles.headline.copyWith(
+                    color: themeData
+                        .colorScheme.onPrimary, // Use onPrimary color for text
+                    fontSize: 20,
+                  ),
+                ),
               ),
+              value: isResponder,
+              onChanged: (bool value) {
+                setState(() {
+                  showRespondButton = false;
+                  isResponder = value;
+                  mapTemplate = isResponder
+                      ? 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=a1f757577b5e4d33a9ea5bd8bccffd02'
+                      : 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+                  switchText = isResponder ? "Responder" : "User";
+                });
+              },
             ),
-
+          ),
           if (showRespondButton)
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton.extended(
-                onPressed: () async {
-                  if (!isResponding) {
+            IconButton(
+              icon: Icon(isResponding ? Icons.cancel : Icons.check),
+              color: themeData.colorScheme.onSecondary,
+              onPressed: () async {
+                if (!isResponding) {
+                  try {
                     final location = Location();
                     final locationData = await location.getLocation();
                     final double responderLatitude = locationData.latitude!;
@@ -249,15 +460,26 @@ class _MapScreenState extends State<MapScreen> {
                         .collection('responders')
                         .doc(responderID)
                         .set({
-                      'responderLocation': GeoPoint(responderLatitude, responderLongitude),
+                      'responderLocation':
+                          GeoPoint(responderLatitude, responderLongitude),
                     });
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Responder $responderID is coming for $victimID')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            'Responder $responderID is coming for $victimID')));
                     setState(() {
                       isResponding = true;
                     });
+                  } catch (e) {
+                    showModal(
+                      context,
+                      'Error',
+                      message:
+                          'Failed to respond to distress signal. Please try again later.',
+                    );
                   }
-                  else {
+                } else {
+                  try {
                     await _firestore
                         .collection('distressCalls')
                         .doc(victimID)
@@ -265,49 +487,25 @@ class _MapScreenState extends State<MapScreen> {
                         .doc(responderID)
                         .delete();
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Responder $responderID has stopped!')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Responder $responderID has stopped!')));
                     setState(() {
                       isResponding = false;
                       showRespondButton = false;
                     });
+                  } catch (e) {
+                    showModal(
+                      context,
+                      'Error',
+                      message:
+                          'Failed to stop responding. Please try again later.',
+                    );
                   }
-                },
-                label: isResponding ? const Text('Cancel') : const Text('Respond'),
-                icon: const Icon(Icons.check),
-              ),
+                }
+              },
             ),
-          Align(
-            alignment: Alignment(1.0, 1.0),
-            child: FloatingActionButton(
-              onPressed: _centerOnMarker,
-              child: const Icon(Icons.my_location),
-            ),
-          ),
-          Align(
-            alignment: Alignment(1.0, 1.0),
-            child:
-            Container(
-              width: 175,
-              child: Builder(
-                builder: (context) => SwitchListTile(
-                  tileColor: Colors.red,
-                  title: Text(switchText),
-                  value: isResponder,
-                  onChanged: (bool value) {
-                    setState(() {
-                      showRespondButton = false;
-                      isResponder = value;
-                      mapTemplate = isResponder? 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=a1f757577b5e4d33a9ea5bd8bccffd02' : 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
-                      switchText = isResponder ? "Responder" : "User";
-                    });
-                  },
-                ),
-              ),
-            ),
-          )
         ],
       ),
-
       body: Stack(
         children: [
           FlutterMap(
@@ -322,8 +520,6 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               TileLayer(
                 urlTemplate: mapTemplate,
-                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', dark mode
                 userAgentPackageName: 'com.example.app',
               ),
               CircleLayer(
@@ -336,6 +532,36 @@ class _MapScreenState extends State<MapScreen> {
                 markers: _mapMarkers,
               ),
             ],
+          ),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Logo(
+                  onTap: () async {
+                    if (!isCalling) {
+                      _sendDistressSignal(FirebaseAuth.instance.currentUser);
+                      setState(() {
+                        isCalling = true;
+                        _userLocationCircles.clear();
+                      });
+                    } else {
+                      _deleteSignal(FirebaseAuth.instance.currentUser);
+                      setState(() {
+                        isCalling = false;
+                      });
+                    }
+                  },
+                  logoWidth: 100, // Adjust the width as needed
+                  logoHeight: 100, // Adjust the height as needed
+                ),
+              ),
+            ),
           ),
         ],
       ),

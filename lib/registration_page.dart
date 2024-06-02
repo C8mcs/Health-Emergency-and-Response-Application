@@ -47,7 +47,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _contactNumError = '';
   String _passwordError = '';
 
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -264,6 +263,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         showModal(
           context,
           'Registration Successful!',
+          message: 'You have successfully registered.',
         );
 
         if (widget.onRegistrationCompleted != null) {
@@ -280,12 +280,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
       if (e is FirebaseAuthException) {
         showModal(
           context,
-          getErrorMessage(e.code),
+          'Registration Failed',
+          message: getErrorMessage(e.code),
         );
       } else {
         showModal(
           context,
-          'Registration failed. Please try again.',
+          'Registration Failed',
+          message: 'Registration failed. Please try again.',
         );
       }
     }

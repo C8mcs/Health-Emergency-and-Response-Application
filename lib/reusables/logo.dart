@@ -6,11 +6,15 @@ import '../app_constants.dart';
 
 class Logo extends StatefulWidget {
   final VoidCallback? onTap;
-  final double width;
-  final double height;
+  final double logoWidth; // New property for logo width
+  final double logoHeight; // New property for logo height
 
-  const Logo({Key? key, this.onTap, this.width = 200, this.height = 200})
-      : super(key: key);
+  const Logo({
+    Key? key,
+    this.onTap,
+    required this.logoWidth,
+    required this.logoHeight,
+  }) : super(key: key);
 
   @override
   _LogoState createState() => _LogoState();
@@ -37,35 +41,33 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
-      child: Stack(
-        children: [
-          // Circles Stack
-          Stack(
+        onTap: widget.onTap,
+        child: Center(
+          child: Stack(
             children: [
-              _buildCircle(0),
-              _buildCircle(1),
-              _buildCircle(2),
+              // Circles Stack
+              Stack(
+                children: [
+                  _buildCircle(0),
+                  _buildCircle(1),
+                  _buildCircle(2),
+                ],
+              ),
+              // Logo Stack
+              Positioned.fill(
+                child: Center(
+                  child: SizedBox(
+                    width: widget.logoWidth,
+                    height: widget.logoWidth,
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
-          // Logo Stack
-          Positioned.fill(
-            child: Center(
-              child: SizedBox(
-                width: widget.width,
-                height: widget.height,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: widget.width,
-                  height: widget.height,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildCircle(int index) {
@@ -81,7 +83,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin {
         alignment: Alignment.center,
         child: CircleAvatar(
           backgroundColor: AppColors.primary,
-          radius: 50 + (index * 15),
+          radius: 100 + (index * 15),
         ),
       ),
     );
