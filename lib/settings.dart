@@ -1,32 +1,50 @@
 import 'package:flutter/material.dart';
-import 'user_pref.dart';
-import 'change_pw.dart';
+import 'package:provider/provider.dart';
+
+import 'app_constants.dart';
 import 'change_email.dart';
+import 'change_pw.dart';
 import 'logout.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Settings Page',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: SettingsPage(),
-    );
-  }
-}
+import 'theme_notifier.dart';
+import 'user_pref.dart';
 
 class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
+
     return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              'Settings', // Main title
+              style: AppTextStyles.headline.copyWith(
+                color: themeData
+                    .colorScheme.onPrimary, // Use onPrimary color for text
+                fontSize: 20, // Adjust the font size as needed
+              ),
+            ),
+            Text(
+              'Customize your preferences', // Subtitle-like text
+              style: AppTextStyles.subheading.copyWith(
+                color: themeData
+                    .colorScheme.onPrimary, // Use onPrimary color for text
+                fontSize: 14, // Adjust the font size as needed
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: themeData.colorScheme.primary,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -68,14 +86,14 @@ class SettingsPage extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text('Confirm logout'),
-                      content: Text('Are you sure you want to log out?'),
+                      title: const Text('Confirm logout'),
+                      content: const Text('Are you sure you want to log out?'),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop(); // Close the dialog
                           },
-                          child: Text('Cancel'),
+                          child: const Text('Cancel'),
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -84,7 +102,10 @@ class SettingsPage extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                           ),
-                          child: Text('Logout', style: TextStyle(color: Colors.white),),
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     );
@@ -104,22 +125,36 @@ class SettingsMenuItem extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  SettingsMenuItem({required this.icon, required this.text, required this.onTap});
+  SettingsMenuItem(
+      {required this.icon, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    // Access the theme data from the ThemeNotifier
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
-        leading: Icon(icon, color: Colors.black),
-        title: Text(text, style: TextStyle(fontSize: 18, color: Colors.black)),
-        trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+        leading:
+            Icon(icon, color: themeData.iconTheme.color), // Use theme color
+        title: Text(
+          text,
+          style: TextStyle(
+            fontSize: 18,
+            color: themeData.textTheme.bodyLarge?.color, // Use theme color
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios,
+            color: themeData.iconTheme.color), // Use theme color
         onTap: onTap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
-        tileColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+        tileColor: themeData.cardColor, // Use theme color
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
       ),
     );
   }

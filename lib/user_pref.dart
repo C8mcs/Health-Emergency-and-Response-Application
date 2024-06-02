@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/theme_notifier.dart';
+import 'package:provider/provider.dart';
+
+import 'constants/themes.dart';
 
 class PreferencesPage extends StatefulWidget {
   @override
@@ -6,16 +10,16 @@ class PreferencesPage extends StatefulWidget {
 }
 
 class _PreferencesPageState extends State<PreferencesPage> {
-  bool _darkMode = false;
   String _colorScheme = 'Blue';
   bool _voiceActivation = false;
   String _language = 'English';
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    bool _darkMode = themeNotifier.currentTheme == AppThemes.darkTheme;
     return Scaffold(
-      appBar: AppBar(
-      ),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -23,22 +27,28 @@ class _PreferencesPageState extends State<PreferencesPage> {
           children: <Widget>[
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Preferences',
-                style: TextStyle(fontWeight: FontWeight.bold,
-                  fontSize: 24,),),
+              child: Text(
+                'Preferences',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
             ),
             Container(
               height: 0.5,
               width: 1000,
-                color: Colors.black,
+              color: Colors.black,
             ),
-            SizedBox(height: 20 ,),
+            SizedBox(
+              height: 20,
+            ),
             SwitchListTile(
               title: Text('Dark Mode'),
               value: _darkMode,
               onChanged: (bool value) {
                 setState(() {
-                  _darkMode = value;
+                  themeNotifier.switchTheme();
                 });
               },
             ),
