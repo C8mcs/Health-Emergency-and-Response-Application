@@ -1,8 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'app_constants.dart';
+import 'theme_notifier.dart';
 
 class ChangeEmailPage extends StatefulWidget {
+  const ChangeEmailPage({super.key});
+
   @override
   _ChangeEmailPageState createState() => _ChangeEmailPageState();
 }
@@ -44,7 +50,8 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
       try {
         await _reauthenticateUser(password);
         await sendEmailChangeRequest(newEmail);
-        _showMessage('Email change request sent. Check your email for the verification link.');
+        _showMessage(
+            'Email change request sent. Check your email for the verification link.');
       } catch (error) {
         _showMessage('Failed to send email change request: $error');
       }
@@ -124,10 +131,23 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
+
     return Scaffold(
-      backgroundColor: Colors.red[50],
+      backgroundColor:
+          themeData.colorScheme.secondary, // Use theme background color
       appBar: AppBar(
-        title: Text('Change Email'),
+        title: Text(
+          'Change Email',
+          style: AppTextStyles.headline.copyWith(
+            color:
+                themeData.colorScheme.onPrimary, // Use onPrimary color for text
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor:
+            themeData.colorScheme.primary, // Use theme app bar color
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -139,20 +159,21 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               SizedBox(height: 70),
               Text(
                 'Current Email:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: themeData.textTheme.bodyMedium, // Use theme text style
               ),
               Text(
-                _currentUserEmail ?? 'Loading...', // Display current user's email
-                style: TextStyle(fontSize: 16),
+                _currentUserEmail ??
+                    'Loading...', // Display current user's email
+                style: themeData.textTheme.bodyMedium, // Use theme text style
               ),
               SizedBox(height: 30),
               Text(
                 'New Email:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: themeData.textTheme.bodyMedium, // Use theme text style
               ),
               SizedBox(height: 10),
               Container(
-                color: Colors.grey[200],
+                color: themeData.cardColor, // Use theme card color
                 child: TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -168,23 +189,30 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                 child: ElevatedButton(
                   onPressed: _saveEmail,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFF24171),
+                    foregroundColor: themeData.colorScheme.primaryContainer,
+                    backgroundColor: themeData.colorScheme
+                        .primaryContainer, // Use theme onPrimary color
                     shadowColor: Colors.black,
                     elevation: 10.0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2.0),
+                      borderRadius: BorderRadius.circular(
+                          10.0), // Use theme onSurface color
                     ),
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(10),
                     child: Text(
                       'Save',
-                      style: TextStyle(fontSize: 14, color: Colors.white),
+                      style: AppTextStyles.headline.copyWith(
+                        color: themeData.colorScheme
+                            .onPrimary, // Use onPrimary color for text
+                        fontSize: 15,
+                        // Use theme button text style
+                      ),
                     ),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

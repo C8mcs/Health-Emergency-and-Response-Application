@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
+import 'app_constants.dart';
+import 'theme_notifier.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -14,54 +16,61 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   String _savedPassword = '';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _fetch();
   }
 
   _fetch() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null){
+    if (firebaseUser != null) {
       try {
         final userData = await FirebaseFirestore.instance
             .collection('users')
             .doc(firebaseUser.uid)
             .get();
-        if (userData.exists){
+        if (userData.exists) {
           setState(() {
             _passwordController.text = userData['password'];
           });
         }
-      }
-      catch (e){
+      } catch (e) {
         print('Error fetching user data: $e');
-    }
+      }
     }
   }
 
-  Future<void> _savePassword() async{
+  Future<void> _savePassword() async {
     final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null){
-      try{
+    if (firebaseUser != null) {
+      try {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(firebaseUser.uid)
             .update({
-         'password': _passwordController.text,
+          'password': _passwordController.text,
         });
         print('Password updated successfully.');
-      } catch(e){
-
-    }
+      } catch (e) {}
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
+
     return Scaffold(
-      backgroundColor: Colors.red[50],
+      backgroundColor: themeData.colorScheme.secondary,
       appBar: AppBar(
-        title: Text('Change Username'),
+        title: Text(
+          'Change Username',
+          style: AppTextStyles.headline.copyWith(
+              color: themeData
+                  .colorScheme.onPrimary, // Use onPrimary color for text
+              fontSize: 20),
+        ),
+        backgroundColor: themeData.colorScheme.primary,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -70,32 +79,38 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 70,),
+              const SizedBox(
+                height: 70,
+              ),
               Text(
                 'New Password',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                style: AppTextStyles.headline.copyWith(
+                  color: themeData
+                      .colorScheme.onPrimary, // Use onPrimary color for text
+                  fontSize: 20,
+                ),
               ),
-              Text(
+              const Text(
                 'You will be changing your password.\nType your new password on the text field below.\nBe Secure.',
               ),
-              SizedBox(height: 30,),
+              const SizedBox(
+                height: 30,
+              ),
               Container(
-                color: Colors.grey[200], // Set the background color here
+                color: themeData.cardColor, // Set the background color here
                 child: TextField(
-                  controller: _passwordController, // Use the controller to get the entered password
+                  controller:
+                      _passwordController, // Use the controller to get the entered password
                   decoration: InputDecoration(
                     labelText: 'New Password',
-                    labelStyle: TextStyle(color: Colors.grey), // Color of the label text
-                    hintText: 'Enter your new password',
-                    hintStyle: TextStyle(color: Colors.grey), // Color of the hint text
-                    border: OutlineInputBorder( // Border around the text field
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
                   obscureText: true,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -106,14 +121,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Password Too Short'),
-                            content: Text('Your password must be at least 6 characters long.'),
+                            title: const Text('Password Too Short'),
+                            content: const Text(
+                                'Your password must be at least 6 characters long.'),
                             actions: [
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
                                 },
-                                child: Text('OK'),
+                                child: const Text('OK'),
                               ),
                             ],
                           );
@@ -125,14 +142,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Confirm Save'),
-                            content: Text('Are you sure you want to save this new password?'),
+                            title: const Text('Confirm Save'),
+                            content: const Text(
+                                'Are you sure you want to save this new password?'),
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
                                 },
-                                child: Text('Cancel'),
+                                child: const Text('Cancel'),
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -141,9 +160,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                   });
                                   print('Saved Password: $_savedPassword');
                                   // Here you can add the logic to save the new password
-                                  Navigator.of(context).pop(); // Close the dialog
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
                                 },
-                                child: Text('Save'),
+                                child: const Text('Save'),
                               ),
                             ],
                           );
@@ -152,21 +172,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFF24171),
+                    backgroundColor: const Color(0xFFF24171),
                     shadowColor: Colors.black,
                     elevation: 10.0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2.0),
+                      side: const BorderSide(color: Colors.white, width: 2.0),
                     ),
                   ),
-                  child: Padding(
+                  child: const Padding(
                     padding: EdgeInsets.only(
                         left: 10, right: 10.0, top: 5, bottom: 5),
                     child: Text(
                       'Save',
                       textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 14, color: Colors.white,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
                       ),
                     ),
                   ),
