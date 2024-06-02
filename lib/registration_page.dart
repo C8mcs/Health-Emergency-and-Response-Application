@@ -46,6 +46,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _contactNumError = '';
   String _passwordError = '';
 
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -204,7 +205,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
       bool isContactNumberValid =
           RegExp(r'^09[0-9]{9}$').hasMatch(_contactNumberController.text);
       bool isPasswordValid = _validatePassword(_passwordController.text);
-
       _registrationFilled = _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
