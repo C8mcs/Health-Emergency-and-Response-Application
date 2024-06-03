@@ -79,48 +79,40 @@ class SettingsPage extends StatelessWidget {
                 );
               },
             ),
-             SizedBox(height: 20),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Confirm logout'),
-                        content: Text('Are you sure you want to log out?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                            child: Text('Cancel'),
+            SettingsMenuItem(
+              icon: Icons.logout,
+              text: 'Logout',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Confirm logout'),
+                      content: const Text('Are you sure you want to log out?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            logout(context); // Perform logout
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              logout(context); // Perform logout
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryVariant,
-                            ),
-                            child: Text('Logout', style: TextStyle(color: AppColors.secondary)),
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.white),
                           ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryVariant,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                icon: Icon(Icons.logout, color: AppColors.secondary),
-                label: Text('Logout', style: TextStyle(fontSize: 18, color: AppColors.secondary),
-              ),
-            ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),

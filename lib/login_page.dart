@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                         Text('Welcome Back!', style: AppTextStyles.subheading2),
                         CustomTextField(
                           controller: _usernameController,
-                          hintText: 'Email',
+                          hintText: 'Username',
                           hintTextColor: AppColors.tertiary,
                           textFieldColor: AppColors.secondary,
                           textColor: AppColors.tertiaryVariant,
