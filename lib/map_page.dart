@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
-
 import 'app_constants.dart';
 import 'models/signal.dart';
 import 'reusables/logo.dart';
@@ -39,6 +37,8 @@ class _MapScreenState extends State<MapScreen> {
   late LocationData _currentLocation;
   late MapController _mapController;
   StreamSubscription<QuerySnapshot>? _locationStreamSubscription;
+  StreamSubscription<QuerySnapshot>? _respondersStreamSubscription;
+  StreamSubscription<QuerySnapshot>? _safeStreamSubscription;
   String mapTemplate = 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png';
   String responderID = '';
   String victimID = '';
@@ -108,6 +108,32 @@ class _MapScreenState extends State<MapScreen> {
         .listen((querySnapshot) {
       _clearMarkers();
       _createMarkers(querySnapshot);
+    });
+
+    _respondersStreamSubscription = _firestore
+        .collection('distressCalls')
+        .doc(currentUserID)
+        .collection('responders')
+        .snapshots()
+        .listen((querySnapshot) {
+      querySnapshot.docChanges.forEach((change) {
+        if (isCalling) {
+          if (change.type == DocumentChangeType.added) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('A responder is on their way!',  style: TextStyle(color: Colors.white), // Set text color to white
+              ),
+              backgroundColor: Colors.red, // Set background color to red
+            ));
+          }
+          if (change.type == DocumentChangeType.removed) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('A responder has stopped and is no longer coming for you!',  style: TextStyle(color: Colors.white), // Set text color to white
+              ),
+              backgroundColor: Colors.red, // Set background color to red
+            ));
+          }
+        }
+      });
     });
   }
 
@@ -179,7 +205,40 @@ class _MapScreenState extends State<MapScreen> {
                           ),
                           actions: [
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
+                                {
+                                  try {
+                                    final location = Location();
+                                    final locationData = await location.getLocation();
+                                    final double responderLatitude = locationData.latitude!;
+                                    final double responderLongitude = locationData.longitude!;
+
+                                    await _firestore
+                                        .collection('distressCalls')
+                                        .doc(victimID)
+                                        .collection('responders')
+                                        .doc(responderID)
+                                        .set({
+                                      'responderLocation':
+                                      GeoPoint(responderLatitude, responderLongitude),
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text('The victim has been notified that you are on the way!',  style: TextStyle(color: Colors.white), // Set text color to white
+                                      ),
+                                      backgroundColor: Colors.red, // Set background color to red
+                                    ));
+                                    setState(() {
+                                      isResponding = true;
+                                    });
+                                  } catch (e) {
+                                    showModal(
+                                      context,
+                                      'Error',
+                                      message:
+                                      'Failed to respond to distress signal. Please try again later.',
+                                    );
+                                  }
+                                }
                                 setState(() {
                                   responderID =
                                       FirebaseAuth.instance.currentUser!.uid;
@@ -198,6 +257,7 @@ class _MapScreenState extends State<MapScreen> {
                                       ],
                                     ),
                                   );
+
                                 });
                                 Navigator.pop(context);
                               },
@@ -237,7 +297,7 @@ class _MapScreenState extends State<MapScreen> {
                     children: [
                       const Icon(Icons.person_pin_circle, color: Colors.red),
                       Text(
-                        emergencyType ?? 'Unknown',
+                        emergencyType ?? '',
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -313,7 +373,7 @@ class _MapScreenState extends State<MapScreen> {
       String emergencyType = await _showEmergencyTypeDialog();
 
       // You can retrieve the user information here
-      String name = user?.displayName ?? '';
+      String name = user?.email ?? '';
       String contactNumber = user?.phoneNumber ?? '';
       // Get the emergency contact number from wherever it's stored
       String emergencyContactNumber = ''; // TODO: Get emergency contact number
@@ -437,48 +497,17 @@ class _MapScreenState extends State<MapScreen> {
                   mapTemplate = isResponder
                       ? 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=a1f757577b5e4d33a9ea5bd8bccffd02'
                       : 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
-                  switchText = isResponder ? "Responder" : "User";
+                  switchText = isResponder ? "Respond" : "User";
                 });
               },
             ),
           ),
           if (showRespondButton)
             IconButton(
-              icon: Icon(isResponding ? Icons.cancel : Icons.check),
+              icon: Icon(Icons.cancel),
               color: themeData.colorScheme.onSecondary,
               onPressed: () async {
-                if (!isResponding) {
-                  try {
-                    final location = Location();
-                    final locationData = await location.getLocation();
-                    final double responderLatitude = locationData.latitude!;
-                    final double responderLongitude = locationData.longitude!;
-
-                    await _firestore
-                        .collection('distressCalls')
-                        .doc(victimID)
-                        .collection('responders')
-                        .doc(responderID)
-                        .set({
-                      'responderLocation':
-                          GeoPoint(responderLatitude, responderLongitude),
-                    });
-
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            'Responder $responderID is coming for $victimID')));
-                    setState(() {
-                      isResponding = true;
-                    });
-                  } catch (e) {
-                    showModal(
-                      context,
-                      'Error',
-                      message:
-                          'Failed to respond to distress signal. Please try again later.',
-                    );
-                  }
-                } else {
+                if (isResponding) {
                   try {
                     await _firestore
                         .collection('distressCalls')
@@ -486,26 +515,76 @@ class _MapScreenState extends State<MapScreen> {
                         .collection('responders')
                         .doc(responderID)
                         .delete();
-
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Responder $responderID has stopped!')));
+                      content: Text('Responder has suddenly stopped!',  style: TextStyle(color: Colors.white), // Set text color to white
+                      ),
+                      backgroundColor: Colors.red, // Set background color to red
+                    ));
                     setState(() {
                       isResponding = false;
                       showRespondButton = false;
+                      routeToDistressed.clear();
                     });
                   } catch (e) {
                     showModal(
                       context,
                       'Error',
                       message:
-                          'Failed to stop responding. Please try again later.',
+                      'Failed to stop responding. Please try again later.',
                     );
                   }
                 }
               },
             ),
+          if (showRespondButton)
+            IconButton(
+              icon: Icon(Icons.check),
+              color: themeData.colorScheme.onSecondary,
+              onPressed: () async {
+                if (isResponding) {
+                  try {
+                    await _firestore
+                        .collection('distressCalls')
+                        .doc(victimID)
+                        .set({'responderSafe': true,});
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Responder has confirmed that the situation is safe! Waiting for user confirmation...',  style: TextStyle(color: Colors.white), // Set text color to white
+                        ),
+                      backgroundColor: Colors.red, // Set background color to red
+                    ));
+                    setState(() {
+                    });
+                  } catch (e) {
+                    showModal(
+                      context,
+                      'Error',
+                      message:
+                      'Failed to stop responding. Please try again later.',
+                    );
+                  }
+                }
+              },
+            ),
+          if (isCalling)
+            IconButton(
+              icon: Icon(Icons.check),
+              color: themeData.colorScheme.onSecondary,
+              onPressed: () async {
+                await _firestore
+                    .collection('distressCalls')
+                    .doc(victimID)
+                    .set({'userSafe': true,});
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('You have confirmed that the situation is safe! Waiting for responder confirmation...', style: TextStyle(color: Colors.white), // Set text color to white
+                    ),
+                  backgroundColor: Colors.red, // Set background color to red)
+                )
+                );
+              },
+            ),
         ],
       ),
+
       body: Stack(
         children: [
           FlutterMap(
