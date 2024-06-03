@@ -70,16 +70,6 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             SettingsMenuItem(
-              icon: Icons.settings,
-              text: 'Preferences',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PreferencesPage()),
-                );
-              },
-            ),
-            SettingsMenuItem(
               icon: Icons.logout,
               text: 'Logout',
               onTap: () {
