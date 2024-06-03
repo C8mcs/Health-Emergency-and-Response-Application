@@ -8,8 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'reusables/custom_widget_profile_page.dart';
+import 'package:provider/provider.dart';
+
 import 'app_constants.dart';
+import 'reusables/custom_widget_profile_page.dart';
+import 'theme_notifier.dart';
 
 class ProfileApp extends StatelessWidget {
   const ProfileApp({super.key});
@@ -167,8 +170,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final themeData = themeNotifier.currentTheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFD92B4B),
+      backgroundColor: themeData.colorScheme.primary,
       body: SafeArea(
         child: GestureDetector(
           onVerticalDragUpdate: (details) {
@@ -183,9 +188,9 @@ class _ProfilePageState extends State<ProfilePage> {
             }
           },
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
               ),
@@ -206,7 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             Container(
                               padding: EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Color(0xFFD92B4B),
+                                color: themeData.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               height: 270,
@@ -404,8 +409,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 10),
-                        Text(
+                        const SizedBox(height: 10),
+                        const Text(
                           "...",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -416,6 +421,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
+                  Center(
+                      child: Column(
+                    children: [
+                      Text(
+                        'Drag to reveal and edit info',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            fontFamily: 'Montserrat',
+                            color: Color(0xFFD92B4B)),
+                      ),
+                    ],
+                  )),
                   //
                   //Visible display when dragged down
                   //
@@ -751,13 +769,36 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ),
                                         actions: <Widget>[
                                           TextButton(
-                                            child: Text("Cancel"),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: themeData
+                                                  .colorScheme.onPrimary,
+                                              // Set your desired background color here
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                    20), // Set the border radius here
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              "Cancel",
+                                              style: TextStyle(
+                                                  color: AppColors
+                                                      .primary), // Set the text color here
+                                            ),
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
                                           ),
                                           TextButton(
-                                            child: Text("Confirm"),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: themeData
+                                                  .colorScheme.onPrimary,
+                                              // Set your desired background color here
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                    20), // Set the border radius here
+                                              ),
+                                            ),
+                                            child: const Text("Confirm"),
                                             onPressed: () {
                                               _saveProfile();
 

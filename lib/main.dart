@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
             '/profile': (context) => const ProfilePage(),
             '/map': (context) => const MapScreen(),
             '/settings': (context) => const SettingsPage(),
-            '/changeEmail': (context) => const ChangeEmailPage(),
+            '/changeEmail': (context) => ChangeEmailPage(),
             '/changePassword': (context) => ChangePasswordPage(),
             '/preferences': (context) => PreferencesPage(),
           },

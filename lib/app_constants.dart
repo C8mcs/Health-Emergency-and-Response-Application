@@ -49,6 +49,21 @@ class AppTextStyles {
     ],
   );
 
+  static final TextStyle subheading3 = GoogleFonts.getFont(
+    _fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 38,
+    color: const Color(0xFFF2F2F2),
+    shadows: [
+      Shadow(
+        offset: Offset(0, 2), // Position the shadow below the text
+        blurRadius: 3.0, // Adjust the blur radius as needed
+        color: Colors.black
+            .withOpacity(0.5), // Adjust the shadow color and opacity
+      ),
+    ],
+  );
+
   static final TextStyle bodyText1 = GoogleFonts.getFont(
     _fontFamily,
     fontWeight: FontWeight.bold,

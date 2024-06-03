@@ -39,7 +39,6 @@ class _MapScreenState extends State<MapScreen> {
   late LocationData _currentLocation;
   late MapController _mapController;
   StreamSubscription<QuerySnapshot>? _locationStreamSubscription;
-  StreamSubscription<QuerySnapshot>? _respondersStreamSubscription;
   String mapTemplate = 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png';
   String responderID = '';
   String victimID = '';
@@ -74,7 +73,7 @@ class _MapScreenState extends State<MapScreen> {
         _currentLocation = locationData;
         if (_distressCallRef != null) {
           final victimLocation =
-          GeoPoint(locationData.latitude!, locationData.longitude!);
+              GeoPoint(locationData.latitude!, locationData.longitude!);
           try {
             _distressCallRef!.update({'victimLocation': victimLocation});
           } catch (e) {
@@ -82,13 +81,13 @@ class _MapScreenState extends State<MapScreen> {
               context,
               'Error',
               message:
-              'Failed to update victim location. Please try again later.',
+                  'Failed to update victim location. Please try again later.',
             );
           }
           if (!isCalling) {
             _userLocationCircles.clear();
             LatLng userLocation =
-            LatLng(_currentLocation.latitude!, _currentLocation.longitude!);
+                LatLng(_currentLocation.latitude!, _currentLocation.longitude!);
             _userLocationCircles.add(
               CircleMarker(
                 point: userLocation,
@@ -109,21 +108,6 @@ class _MapScreenState extends State<MapScreen> {
         .listen((querySnapshot) {
       _clearMarkers();
       _createMarkers(querySnapshot);
-    });
-
-    _respondersStreamSubscription = _firestore
-        .collection('distressCalls')
-        .doc(currentUserID)
-        .collection('responders')
-        .snapshots()
-        .listen((querySnapshot) {
-      querySnapshot.docChanges.forEach((change) {
-        if (change.type == DocumentChangeType.added) {
-          if (isCalling) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Responders are on their way!')));
-          }
-        }
-      });
     });
   }
 
@@ -477,7 +461,7 @@ class _MapScreenState extends State<MapScreen> {
                         .doc(responderID)
                         .set({
                       'responderLocation':
-                      GeoPoint(responderLatitude, responderLongitude),
+                          GeoPoint(responderLatitude, responderLongitude),
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -491,7 +475,7 @@ class _MapScreenState extends State<MapScreen> {
                       context,
                       'Error',
                       message:
-                      'Failed to respond to distress signal. Please try again later.',
+                          'Failed to respond to distress signal. Please try again later.',
                     );
                   }
                 } else {
@@ -514,7 +498,7 @@ class _MapScreenState extends State<MapScreen> {
                       context,
                       'Error',
                       message:
-                      'Failed to stop responding. Please try again later.',
+                          'Failed to stop responding. Please try again later.',
                     );
                   }
                 }

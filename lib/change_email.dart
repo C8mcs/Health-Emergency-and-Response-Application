@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:health_emergency_response_app/theme_notifier.dart';
 import 'package:provider/provider.dart';
 
 import 'app_constants.dart';
-import 'theme_notifier.dart';
 
 class ChangeEmailPage extends StatefulWidget {
-  const ChangeEmailPage({super.key});
-
   @override
   _ChangeEmailPageState createState() => _ChangeEmailPageState();
 }
@@ -50,8 +48,9 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
       try {
         await _reauthenticateUser(password);
         await sendEmailChangeRequest(newEmail);
-        _showMessage(
-            'Email change request sent. Check your email for the verification link.');
+        _showMessage('Your email has been updated successfully.');
+        // Navigate back to settings
+        Navigator.pop(context);
       } catch (error) {
         _showMessage('Failed to send email change request: $error');
       }
@@ -135,19 +134,18 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     final themeData = themeNotifier.currentTheme;
 
     return Scaffold(
-      backgroundColor:
-          themeData.colorScheme.secondary, // Use theme background color
+      backgroundColor: themeData.colorScheme.primary,
       appBar: AppBar(
-        title: Text(
-          'Change Email',
-          style: AppTextStyles.headline.copyWith(
-            color:
-                themeData.colorScheme.onPrimary, // Use onPrimary color for text
-            fontSize: 20,
-          ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Set your desired color here
         ),
-        backgroundColor:
-            themeData.colorScheme.primary, // Use theme app bar color
+        title: Text('Change Email',
+            style: AppTextStyles.headline.copyWith(
+              color: themeData
+                  .colorScheme.onPrimary, // Use onPrimary color for text
+              fontSize: 20, // Adjust the font size as needed
+            )),
+        backgroundColor: themeData.colorScheme.primary,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -156,30 +154,70 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 70),
-              Text(
-                'Current Email:',
-                style: themeData.textTheme.bodyMedium, // Use theme text style
-              ),
-              Text(
-                _currentUserEmail ??
-                    'Loading...', // Display current user's email
-                style: themeData.textTheme.bodyMedium, // Use theme text style
-              ),
-              SizedBox(height: 30),
-              Text(
-                'New Email:',
-                style: themeData.textTheme.bodyMedium, // Use theme text style
+              Center(
+                child: Icon(
+                  Icons.email,
+                  color: themeData.colorScheme.onPrimary,
+                  size: 75.0,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(2, 2),
+                      blurRadius: 10.0, // Optional: Adjust as needed
+                      color: Colors.black
+                          .withOpacity(0.5), // Optional: Adjust as needed
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 10),
-              Container(
-                color: themeData.cardColor, // Use theme card color
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Enter New Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+              Center(
+                child: Column(
+                  children: [
+                    Text('Current Email:',
+                        style: AppTextStyles.headline.copyWith(
+                          color: themeData.colorScheme
+                              .onPrimary, // Use onPrimary color for text
+                          fontSize: 20, // Adjust the font size as needed
+                        )),
+                    Text(
+                      _currentUserEmail ??
+                          'Loading...', // Display current user's email
+                      style: TextStyle(
+                          fontSize: 16, color: themeData.colorScheme.onPrimary),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30),
+              Text('New Email:',
+                  style: AppTextStyles.headline.copyWith(
+                    color: themeData
+                        .colorScheme.onPrimary, // Use onPrimary color for text
+                    fontSize: 20,
+                  )),
+              SizedBox(height: 10),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Enter New Email',
+                  labelStyle: TextStyle(color: themeData.colorScheme.onPrimary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: themeData.colorScheme
+                          .onPrimary, // Set the color you want when the TextField is focused
+                      width: 2.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: themeData.colorScheme.onPrimary,
+                      // Set the color you want when the TextField is enabled
+                      width: 1.0,
                     ),
                   ),
                 ),
@@ -189,30 +227,24 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                 child: ElevatedButton(
                   onPressed: _saveEmail,
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: themeData.colorScheme.primaryContainer,
-                    backgroundColor: themeData.colorScheme
-                        .primaryContainer, // Use theme onPrimary color
+                    backgroundColor: AppColors.primaryVariant,
                     shadowColor: Colors.black,
                     elevation: 10.0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          10.0), // Use theme onSurface color
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(color: AppColors.secondary, width: 2.0),
                     ),
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(10),
                     child: Text(
                       'Save',
-                      style: AppTextStyles.headline.copyWith(
-                        color: themeData.colorScheme
-                            .onPrimary, // Use onPrimary color for text
-                        fontSize: 15,
-                        // Use theme button text style
-                      ),
+                      style:
+                          TextStyle(fontSize: 14, color: AppColors.secondary),
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

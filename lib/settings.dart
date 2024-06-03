@@ -18,6 +18,7 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -137,22 +138,21 @@ class SettingsMenuItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
-        leading: Icon(icon,
-            color: themeData.secondaryHeaderColor), // Use theme color
+        leading: Icon(icon, color: Colors.white), // Use theme color
         title: Text(
           text,
           style: TextStyle(
             fontSize: 18,
-            color: themeData.secondaryHeaderColor, // Use theme color
+            color: Colors.white, // Use theme color
           ),
         ),
         trailing: Icon(Icons.arrow_forward_ios,
-            color: themeData.iconTheme.color), // Use theme color
+            color: Colors.white), // Use theme color
         onTap: onTap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
-        tileColor: themeData.cardColor, // Use theme color
+        tileColor: themeData.colorScheme.primary, // Use theme color
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
       ),

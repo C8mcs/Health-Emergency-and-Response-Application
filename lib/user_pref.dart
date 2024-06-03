@@ -17,9 +17,18 @@ class _PreferencesPageState extends State<PreferencesPage> {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-    bool _darkMode = themeNotifier.currentTheme == AppThemes.darkTheme;
+    final bool _darkMode = themeNotifier.currentTheme == AppThemes.darkTheme;
+
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text('Preferences'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -2,11 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:health_emergency_response_app/homepage.dart';
+
 import 'app_constants.dart';
 import 'registration_page.dart';
+import 'reset_password.dart';
 import 'reusables/form_constants.dart';
 import 'reusables/logo.dart';
-import 'reset_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -139,23 +140,6 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         SizedBox(height: 5),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => ResetPassword()),
-                              );
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Forget Password?',
-                                style: TextStyle(color: Colors.blue[100]),
-                              ),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 10),
                         RichText(
                           text: TextSpan(
@@ -196,6 +180,24 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: const Text('Login',
                               style: TextStyle(color: AppColors.secondary)),
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ResetPassword()),
+                              );
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'Forget Password?',
+                                style: TextStyle(color: Colors.blue[100]),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
