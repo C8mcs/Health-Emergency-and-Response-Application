@@ -373,8 +373,8 @@ class _MapScreenState extends State<MapScreen> {
       String emergencyType = await _showEmergencyTypeDialog();
 
       // You can retrieve the user information here
-      String name = user?.email ?? '';
-      String contactNumber = user?.phoneNumber ?? '';
+      String name = (user?.firstName ?? '') + (user?.lastname ?? '');
+      String contactNumber = user?.contactNumber ?? '';
       // Get the emergency contact number from wherever it's stored
       String emergencyContactNumber = ''; // TODO: Get emergency contact number
 
