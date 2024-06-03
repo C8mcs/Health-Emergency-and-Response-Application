@@ -122,6 +122,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final themeData = themeNotifier.currentTheme;
+
+  TextStyle errorTextStyle = TextStyle(
+      color: Colors.white, // Set the desired color here
+    );
+    
     return Scaffold(
       backgroundColor: themeData.colorScheme.primary,
       appBar: AppBar(
